@@ -57,14 +57,31 @@ public class SubscriptionService(MarketplaceDbContext db)
             .ToListAsync();
     }
 
-    public async Task<bool> ActivateAsync(Guid subscriptionId)
+    public async Task<(bool Success, string? Error)> ActivateAsync(Guid subscriptionId, string planId, int? quantity)
     {
         var subscription = await GetAsync(subscriptionId);
         if (subscription is null)
-            return false;
+            return (false, "Subscription not found.");
 
         if (subscription.SaasSubscriptionStatus != SaasSubscriptionStatus.PendingFulfillmentStart)
-            return false;
+            return (false, "Subscription is not in PendingFulfillmentStart state.");
+
+        if (planId != subscription.PlanId)
+            return (false, $"planId '{planId}' does not match the subscription's plan '{subscription.PlanId}'.");
+
+        // Check if the plan is seat-based — if so, quantity is required
+        var plan = await db.Plans.FirstOrDefaultAsync(p => p.PlanId == planId && p.OfferId == subscription.OfferId);
+        if (plan is not null && plan.IsPricePerSeat)
+        {
+            if (quantity is null || quantity <= 0)
+                return (false, "quantity is required for seat-based plans.");
+            subscription.Quantity = quantity;
+        }
+        else
+        {
+            if (quantity is not null)
+                return (false, "quantity must be null for non-seat-based plans.");
+        }
 
         subscription.SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed;
         subscription.Term.StartDate = DateTime.UtcNow;
@@ -73,7 +90,7 @@ public class SubscriptionService(MarketplaceDbContext db)
             : DateTime.UtcNow.AddMonths(1);
 
         await db.SaveChangesAsync();
-        return true;
+        return (true, null);
     }
 
     public async Task<Operation?> ChangePlanAsync(Guid subscriptionId, string newPlanId)

@@ -41,15 +41,17 @@ public class SubscriptionServiceTests
     public async Task Activate_FromPending_Succeeds()
     {
         var (db, service) = CreateService();
+        db.Plans.Add(new Plan { PlanId = "silver", DisplayName = "Silver", OfferId = "offer1", IsPricePerSeat = true });
         var sub = CreateSubscription(SaasSubscriptionStatus.PendingFulfillmentStart);
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        var result = await service.ActivateAsync(sub.Id);
+        var (success, _) = await service.ActivateAsync(sub.Id, "silver", 10);
 
-        Assert.True(result);
+        Assert.True(success);
         var updated = await db.Subscriptions.FindAsync(sub.Id);
         Assert.Equal(SaasSubscriptionStatus.Subscribed, updated!.SaasSubscriptionStatus);
+        Assert.Equal(10, updated.Quantity);
     }
 
     [Theory]
@@ -63,7 +65,7 @@ public class SubscriptionServiceTests
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        var result = await service.ActivateAsync(sub.Id);
+        var (result, _) = await service.ActivateAsync(sub.Id, sub.PlanId, null);
         Assert.False(result);
     }
 

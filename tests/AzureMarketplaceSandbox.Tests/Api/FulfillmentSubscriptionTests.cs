@@ -58,7 +58,9 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
         var subId = Guid.NewGuid();
         await factory.SeedAsync(async db =>
         {
-            db.Offers.Add(new Offer { OfferId = "test-offer", PublisherId = "pub1", DisplayName = "Test" });
+            var offer = new Offer { OfferId = "test-offer", PublisherId = "pub1", DisplayName = "Test" };
+            offer.Plans.Add(new Plan { PlanId = "plan1", DisplayName = "Plan 1", OfferId = "test-offer", IsPricePerSeat = true });
+            db.Offers.Add(offer);
             db.Subscriptions.Add(new Subscription
             {
                 Id = subId,
@@ -76,14 +78,85 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
         });
 
         var client = factory.CreateAuthenticatedClient();
-        var response = await client.PostAsync(
-            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31", null);
+        var response = await client.PostAsJsonAsync(
+            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31",
+            new { planId = "plan1", quantity = 5 });
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        // Verify status changed
+        // Verify status changed and quantity updated
         var getResponse = await client.GetFromJsonAsync<JsonElement>(
             $"/api/saas/subscriptions/{subId}?api-version=2018-08-31");
         Assert.Equal("Subscribed", getResponse.GetProperty("saasSubscriptionStatus").GetString());
+        Assert.Equal(5, getResponse.GetProperty("quantity").GetInt32());
+    }
+
+    [Fact]
+    public async Task Activate_WithoutBody_Returns400()
+    {
+        using var factory = new SandboxWebApplicationFactory();
+        var subId = Guid.NewGuid();
+        await factory.SeedAsync(async db =>
+        {
+            db.Offers.Add(new Offer { OfferId = "o", PublisherId = "p", DisplayName = "O" });
+            db.Subscriptions.Add(new Subscription
+            {
+                Id = subId,
+                Name = "Test",
+                OfferId = "o",
+                PublisherId = "p",
+                PlanId = "pl",
+                SaasSubscriptionStatus = SaasSubscriptionStatus.PendingFulfillmentStart,
+                Beneficiary = new AadInfo { EmailId = "t@t.com" },
+                Purchaser = new AadInfo { EmailId = "t@t.com" },
+                Term = new SubscriptionTerm()
+            });
+            await db.SaveChangesAsync();
+        });
+
+        var client = factory.CreateAuthenticatedClient();
+        var response = await client.PostAsync(
+            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31", null);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Activate_NonSeatBased_QuantityMustBeNull()
+    {
+        using var factory = new SandboxWebApplicationFactory();
+        var subId = Guid.NewGuid();
+        await factory.SeedAsync(async db =>
+        {
+            var offer = new Offer { OfferId = "test-offer", PublisherId = "pub1", DisplayName = "Test" };
+            offer.Plans.Add(new Plan { PlanId = "free", DisplayName = "Free", OfferId = "test-offer", IsPricePerSeat = false });
+            db.Offers.Add(offer);
+            db.Subscriptions.Add(new Subscription
+            {
+                Id = subId,
+                Name = "Test",
+                OfferId = "test-offer",
+                PublisherId = "pub1",
+                PlanId = "free",
+                SaasSubscriptionStatus = SaasSubscriptionStatus.PendingFulfillmentStart,
+                Beneficiary = new AadInfo { EmailId = "t@t.com" },
+                Purchaser = new AadInfo { EmailId = "t@t.com" },
+                Term = new SubscriptionTerm()
+            });
+            await db.SaveChangesAsync();
+        });
+
+        var client = factory.CreateAuthenticatedClient();
+
+        // With quantity on non-seat-based plan → 400
+        var response = await client.PostAsJsonAsync(
+            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31",
+            new { planId = "free", quantity = 5 });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        // Without quantity → 200
+        var response2 = await client.PostAsJsonAsync(
+            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31",
+            new { planId = "free" });
+        Assert.Equal(HttpStatusCode.OK, response2.StatusCode);
     }
 
     [Fact]
@@ -109,8 +182,9 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
         });
 
         var client = factory.CreateAuthenticatedClient();
-        var response = await client.PostAsync(
-            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31", null);
+        var response = await client.PostAsJsonAsync(
+            $"/api/saas/subscriptions/{subId}/activate?api-version=2018-08-31",
+            new { planId = "pl" });
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 

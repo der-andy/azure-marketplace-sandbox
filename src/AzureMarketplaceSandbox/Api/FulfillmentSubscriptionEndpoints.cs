@@ -54,12 +54,21 @@ public static class FulfillmentSubscriptionEndpoints
         // POST /{subscriptionId}/activate
         group.MapPost("/{subscriptionId:guid}/activate", async (
             Guid subscriptionId,
+            HttpContext context,
             SubscriptionService subscriptionService) =>
         {
-            var success = await subscriptionService.ActivateAsync(subscriptionId);
+            ActivateSubscriptionRequest? body = null;
+            try { body = await context.Request.ReadFromJsonAsync<ActivateSubscriptionRequest>(); }
+            catch { /* empty or invalid body */ }
+            if (body is null || string.IsNullOrWhiteSpace(body.PlanId))
+            {
+                return Results.BadRequest(new { message = "Request body with 'planId' is required.", code = "BadArgument" });
+            }
+
+            var (success, error) = await subscriptionService.ActivateAsync(subscriptionId, body.PlanId, body.Quantity);
             if (!success)
             {
-                return Results.BadRequest(new { message = "Subscription cannot be activated. It may not exist or is not in PendingFulfillmentStart state.", code = "BadArgument" });
+                return Results.BadRequest(new { message = error, code = "BadArgument" });
             }
 
             return Results.Ok();
@@ -194,6 +203,12 @@ public static class FulfillmentSubscriptionEndpoints
 
             return Results.Accepted(operationLocation);
         });
+    }
+
+    private record ActivateSubscriptionRequest
+    {
+        public string? PlanId { get; init; }
+        public int? Quantity { get; init; }
     }
 
     private record PatchSubscriptionRequest
