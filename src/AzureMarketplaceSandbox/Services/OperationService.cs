@@ -87,7 +87,7 @@ public class OperationService(MarketplaceDbContext db)
 
             case OperationAction.Renew:
                 subscription.Term.StartDate = DateTime.UtcNow;
-                subscription.Term.EndDate = subscription.Term.CalculateEndDate(DateTime.UtcNow);
+                subscription.Term.EndDate = subscription.Term.CalculateEndDate();
                 break;
         }
     }

@@ -20,21 +20,22 @@ public partial class SubscriptionTerm
     public string TermUnit { get; set; } = "P1M";
 
     /// <summary>
-    /// Calculates the end date by adding the term duration to the given start date.
+    /// Calculates the end date by adding the term duration to StartDate.
     /// TermUnit format: P{amount}{unit} where unit is M (months) or Y (years), e.g. P1M, P3M, P1Y, P2Y.
     /// </summary>
-    public DateTime CalculateEndDate(DateTime startDate)
+    public DateTime CalculateEndDate()
     {
+        var start = StartDate ?? DateTime.UtcNow;
         var match = TermUnitRegex().Match(TermUnit);
         if (!match.Success)
-            return startDate.AddMonths(1); // fallback
+            return start.AddMonths(1); // fallback
 
         var amount = int.Parse(match.Groups[1].Value);
         var unit = match.Groups[2].Value.ToUpperInvariant();
 
         return unit == "Y"
-            ? startDate.AddYears(amount)
-            : startDate.AddMonths(amount);
+            ? start.AddYears(amount)
+            : start.AddMonths(amount);
     }
 
     [GeneratedRegex(@"^P(\d+)([MY])$", RegexOptions.IgnoreCase)]
