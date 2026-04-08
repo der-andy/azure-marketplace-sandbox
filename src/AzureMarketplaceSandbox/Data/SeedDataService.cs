@@ -118,6 +118,130 @@ public class SeedDataService(
         await db.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Seeded offer '{OfferId}' with {PlanCount} plans.", offer.OfferId, offer.Plans.Count);
+
+        logger.LogInformation("Seeding radius-test offer and plans...");
+
+        var base50 = new MeteringDimension
+        {
+            DimensionId = "radiusaas-monthly-base-fee-50",
+            DisplayName = "Base Fee (50)",
+            UnitOfMeasure = "per month",
+            PricePerUnit = 50
+        };
+        var add50 = new MeteringDimension
+        {
+            DimensionId = "add-users-50",
+            DisplayName = "Additional Users Fee (50)",
+            UnitOfMeasure = "per user/month",
+            PricePerUnit = 1
+        };
+
+        var base250 = new MeteringDimension
+        {
+            DimensionId = "radiusaas-monthly-base-fee-250",
+            DisplayName = "Base Fee (250)",
+            UnitOfMeasure = "per month",
+            PricePerUnit = 250
+        };
+        var add250 = new MeteringDimension
+        {
+            DimensionId = "add-users-250",
+            DisplayName = "Additional Users Fee (250)",
+            UnitOfMeasure = "per user/month",
+            PricePerUnit = 0.75m
+        };
+
+        var otp = new MeteringDimension
+        {
+            DimensionId = "radiusaas-otp-setup-support",
+            DisplayName = "Setup support",
+            UnitOfMeasure = "one-time",
+            PricePerUnit = 25
+        };
+
+        var subSub1 = new MeteringDimension
+        {
+            DimensionId = "radiusaas-add-proxy",
+            DisplayName = "RADIUSaaS Additional Proxy",
+            UnitOfMeasure = "",
+            PricePerUnit = 11
+        };
+        var subSub2 = new MeteringDimension
+        {
+            DimensionId = "radiusaas-add-backend",
+            DisplayName = "RADIUSaaS Additional Backend",
+            UnitOfMeasure = "",
+            PricePerUnit = 12
+        };
+        var subSub3 = new MeteringDimension
+        {
+            DimensionId = "radiusaas-add-tenant",
+            DisplayName = "RADIUSaaS Additional Tenant",
+            UnitOfMeasure = "",
+            PricePerUnit = 13
+        };
+
+        var v4 = new Plan
+        {
+            PlanId = "radiusaas-monthly-v4",
+            DisplayName = "RADIUSaaS Test (v4) [OTP]",
+            Description = "bla",
+            IsPricePerSeat = false,
+            HasFreeTrials = false,
+            Market = "DE",
+            BillingTermUnit = "P1M",
+            SubscriptionTermUnit = "P1M",
+            Price = 0,
+            TermDescription = "Monthly subscription"
+        };
+
+
+        var v5 = new Plan
+        {
+            PlanId = "radiusaas-monthly-v5",
+            DisplayName = "RADIUSaaS Test (v5) [OTP, Subsub]",
+            Description = "bla",
+            IsPricePerSeat = false,
+            HasFreeTrials = false,
+            Market = "DE",
+            BillingTermUnit = "P1M",
+            SubscriptionTermUnit = "P1M",
+            Price = 0,
+            TermDescription = "Monthly subscription"
+        };
+
+        var offer2 = new Offer
+        {
+            OfferId = "radiusaas-transactable-prod-preview",
+            PublisherId = publisherId,
+            DisplayName = "RADIUSaaS Test",
+            Currency = "EUR",
+            Plans = [v4, v5],
+            MeteringDimensions = [base50, add50, base250, add250, otp, subSub1, subSub2, subSub3]
+        };
+
+        db.Offers.Add(offer2);
+        await db.SaveChangesAsync(cancellationToken);
+
+        db.PlanMeteringDimensions.AddRange(
+            new PlanMeteringDimension { Plan = v4, MeteringDimension = base50, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v4, MeteringDimension = add50, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v4, MeteringDimension = base250, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v4, MeteringDimension = add250, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v4, MeteringDimension = otp, IncludedQuantity = 0 },
+
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = base50, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = add50, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = base250, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = add250, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = otp, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = subSub1, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = subSub2, IncludedQuantity = 0 },
+            new PlanMeteringDimension { Plan = v5, MeteringDimension = subSub3, IncludedQuantity = 0 }
+        );
+        await db.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation("Seeded offer '{OfferId}' with {PlanCount} plans.", offer2.OfferId, offer2.Plans.Count);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
