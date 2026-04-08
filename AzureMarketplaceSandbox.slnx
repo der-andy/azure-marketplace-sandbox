@@ -6,7 +6,6 @@
     <Project Path="tests/AzureMarketplaceSandbox.Tests/AzureMarketplaceSandbox.Tests.csproj" />
   </Folder>
   <Folder Name="/workflows/">
-    <File Path=".github/workflows/build.yml" />
-    <File Path=".github/workflows/deploy.yml" />
+    <File Path=".github/workflows/ci-cd.yml" />
   </Folder>
 </Solution>
