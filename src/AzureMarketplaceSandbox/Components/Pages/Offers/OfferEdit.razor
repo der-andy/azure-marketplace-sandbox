@@ -30,12 +30,8 @@ else
                     <InputText class="form-control" @bind-Value="_newPlan.DisplayName" />
                 </div>
                 <div class="col-md-1">
-                    <label class="form-label">Min Qty</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.MinQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">Max Qty</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.MaxQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
+                    <label class="form-label">Price</label>
+                    <InputNumber class="form-control" @bind-Value="_newPlan.Price" />
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Billing</label>
@@ -47,6 +43,14 @@ else
                 <div class="col-md-1">
                     <label class="form-label">Term</label>
                     <InputText class="form-control" @bind-Value="_newPlan.SubscriptionTermUnit" />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Min Qty</label>
+                    <InputNumber class="form-control" @bind-Value="_newPlan.MinQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Max Qty</label>
+                    <InputNumber class="form-control" @bind-Value="_newPlan.MaxQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
                 </div>
                 <div class="col-md-1">
                     <div class="form-check mt-4">
@@ -76,6 +80,7 @@ else
                 <tr>
                     <th>Plan ID</th>
                     <th>Display Name</th>
+                    <th>Price</th>
                     <th>Billing</th>
                     <th>Term</th>
                     <th>Per Seat</th>
@@ -90,6 +95,7 @@ else
                     <tr>
                         <td>@plan.PlanId</td>
                         <td>@plan.DisplayName</td>
+                        <td>@plan.Price @_offer.Currency</td>
                         <td>@plan.BillingTermUnit</td>
                         <td>@plan.SubscriptionTermUnit</td>
                         <td>@(plan.IsPricePerSeat ? "Yes" : "No")</td>
@@ -161,7 +167,7 @@ else
     {
         <hr />
         <h4>Dimension Assignment per Plan</h4>
-        <p class="text-muted">Select which dimensions are available for each plan.</p>
+        <p class="text-muted">Select which dimensions are available for each plan and set the included quantity.</p>
 
         <table class="table table-sm">
             <thead>
@@ -180,10 +186,21 @@ else
                         <td>@dim.DimensionId (@dim.DisplayName)</td>
                         @foreach (var plan in _offer.Plans)
                         {
-                            var isAssigned = plan.PlanMeteringDimensions.Any(pmd => pmd.MeteringDimensionId == dim.Id);
+                            var pmd = plan.PlanMeteringDimensions.FirstOrDefault(p => p.MeteringDimensionId == dim.Id);
+                            var isAssigned = pmd is not null;
                             <td class="text-center">
-                                <input type="checkbox" checked="@isAssigned"
-                                       @onchange="(e) => ToggleDimensionAssignment(plan, dim, (bool)e.Value!)" />
+                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                    <input type="checkbox" checked="@isAssigned"
+                                           @onchange="(e) => ToggleDimensionAssignment(plan, dim, (bool)e.Value!)" />
+                                    @if (isAssigned)
+                                    {
+                                        var capturedPmd = pmd!;
+                                        <input type="number" step="any" class="form-control form-control-sm" style="width: 80px;"
+                                               value="@capturedPmd.IncludedQuantity"
+                                               @onchange="(e) => UpdateIncludedQuantity(plan, dim, decimal.TryParse(e.Value?.ToString(), out var v) ? v : 0)"
+                                               placeholder="Incl." />
+                                    }
+                                </div>
                             </td>
                         }
                     </tr>
@@ -302,5 +319,17 @@ else
         }
         await Db.SaveChangesAsync();
         await LoadOffer();
+    }
+
+    private async Task UpdateIncludedQuantity(Plan plan, MeteringDimension dim, decimal quantity)
+    {
+        var existing = await Db.PlanMeteringDimensions
+            .FirstOrDefaultAsync(pmd => pmd.PlanId == plan.Id && pmd.MeteringDimensionId == dim.Id);
+        if (existing is not null)
+        {
+            existing.IncludedQuantity = quantity;
+            await Db.SaveChangesAsync();
+            await LoadOffer();
+        }
     }
 }

@@ -59,7 +59,9 @@ public class SeedDataService(
             HasFreeTrials = false,
             Market = "DE",
             BillingTermUnit = "P1M",
-            SubscriptionTermUnit = "P1M"
+            SubscriptionTermUnit = "P1M",
+            Price = 0,
+            TermDescription = "Monthly free tier"
         };
         var silverPlan = new Plan
         {
@@ -72,7 +74,9 @@ public class SeedDataService(
             HasFreeTrials = true,
             Market = "DE",
             BillingTermUnit = "P1M",
-            SubscriptionTermUnit = "P3M"
+            SubscriptionTermUnit = "P3M",
+            Price = 29.99m,
+            TermDescription = "3-month subscription, billed monthly"
         };
         var goldPlan = new Plan
         {
@@ -85,7 +89,9 @@ public class SeedDataService(
             HasFreeTrials = false,
             Market = "DE",
             BillingTermUnit = "P1Y",
-            SubscriptionTermUnit = "P1Y"
+            SubscriptionTermUnit = "P1Y",
+            Price = 499.99m,
+            TermDescription = "Annual subscription"
         };
 
         var offer = new Offer
@@ -102,12 +108,12 @@ public class SeedDataService(
         await db.SaveChangesAsync(cancellationToken);
 
         db.PlanMeteringDimensions.AddRange(
-            new PlanMeteringDimension { Plan = freePlan, MeteringDimension = apiCalls },
-            new PlanMeteringDimension { Plan = silverPlan, MeteringDimension = apiCalls },
-            new PlanMeteringDimension { Plan = silverPlan, MeteringDimension = storageGb },
-            new PlanMeteringDimension { Plan = goldPlan, MeteringDimension = apiCalls },
-            new PlanMeteringDimension { Plan = goldPlan, MeteringDimension = storageGb },
-            new PlanMeteringDimension { Plan = goldPlan, MeteringDimension = computeHours }
+            new PlanMeteringDimension { Plan = freePlan, MeteringDimension = apiCalls, IncludedQuantity = 100 },
+            new PlanMeteringDimension { Plan = silverPlan, MeteringDimension = apiCalls, IncludedQuantity = 5000 },
+            new PlanMeteringDimension { Plan = silverPlan, MeteringDimension = storageGb, IncludedQuantity = 10 },
+            new PlanMeteringDimension { Plan = goldPlan, MeteringDimension = apiCalls, IncludedQuantity = 50000 },
+            new PlanMeteringDimension { Plan = goldPlan, MeteringDimension = storageGb, IncludedQuantity = 100 },
+            new PlanMeteringDimension { Plan = goldPlan, MeteringDimension = computeHours, IncludedQuantity = 500 }
         );
         await db.SaveChangesAsync(cancellationToken);
 

@@ -15,4 +15,7 @@ public class PlanMeteringDimension
 
     [JsonIgnore]
     public MeteringDimension MeteringDimension { get; set; } = null!;
+
+    [JsonIgnore]
+    public decimal IncludedQuantity { get; set; }
 }

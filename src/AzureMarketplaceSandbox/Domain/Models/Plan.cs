@@ -46,11 +46,38 @@ public class Plan
     public string SubscriptionTermUnit { get; set; } = "P1M";
 
     [JsonIgnore]
+    public decimal Price { get; set; }
+
+    [JsonIgnore]
+    public string TermDescription { get; set; } = string.Empty;
+
+    [JsonIgnore]
     public List<PlanMeteringDimension> PlanMeteringDimensions { get; set; } = [];
 
-    [JsonPropertyName("meteringDimensions")]
-    public List<MeteringDimension> MeteringDimensions =>
-        PlanMeteringDimensions.Select(pmd => pmd.MeteringDimension).ToList();
+    [JsonPropertyName("planComponents")]
+    public PlanComponents PlanComponents => new()
+    {
+        RecurrentBillingTerms =
+        [
+            new RecurrentBillingTerm
+            {
+                Currency = Offer?.Currency ?? "EUR",
+                Price = Price,
+                TermUnit = SubscriptionTermUnit,
+                TermDescription = TermDescription,
+                MeteredQuantityIncluded = PlanMeteringDimensions
+                    .Where(pmd => pmd.MeteringDimension is not null)
+                    .Select(pmd => new MeteredQuantityIncluded
+                    {
+                        DimensionId = pmd.MeteringDimension.DimensionId,
+                        Units = pmd.IncludedQuantity
+                    }).ToList()
+            }
+        ],
+        MeteringDimensions = PlanMeteringDimensions
+            .Where(pmd => pmd.MeteringDimension is not null)
+            .Select(pmd => pmd.MeteringDimension).ToList()
+    };
 
     [JsonIgnore]
     public string OfferId { get; set; } = string.Empty;

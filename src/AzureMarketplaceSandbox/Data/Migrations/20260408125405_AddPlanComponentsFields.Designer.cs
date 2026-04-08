@@ -3,6 +3,7 @@ using System;
 using AzureMarketplaceSandbox.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AzureMarketplaceSandbox.Data.Migrations
 {
     [DbContext(typeof(MarketplaceDbContext))]
-    partial class MarketplaceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408125405_AddPlanComponentsFields")]
+    partial class AddPlanComponentsFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -285,7 +288,8 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.Property<int>("MeteringDimensionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("IncludedQuantity")
+                    b.Property<string>("IncludedQuantity")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("PlanId", "MeteringDimensionId");

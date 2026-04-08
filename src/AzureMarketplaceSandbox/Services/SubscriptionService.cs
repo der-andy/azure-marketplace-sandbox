@@ -52,6 +52,7 @@ public class SubscriptionService(MarketplaceDbContext db)
             return [];
 
         return await db.Plans
+            .Include(p => p.Offer)
             .Include(p => p.PlanMeteringDimensions)
                 .ThenInclude(pmd => pmd.MeteringDimension)
                     .ThenInclude(d => d.Offer)

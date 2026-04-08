@@ -30,7 +30,7 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
         modelBuilder.Entity<Plan>(entity =>
         {
-            entity.Ignore(e => e.MeteringDimensions);
+            entity.Ignore(e => e.PlanComponents);
         });
 
         modelBuilder.Entity<MeteringDimension>(entity =>
