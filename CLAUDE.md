@@ -55,3 +55,47 @@ API routes are identical to Microsoft's (`/api/saas/subscriptions/...`, `/api/us
 - Enums stored as strings in the database via `HasConversion<string>()`
 - Auth is a sandbox pass-through: any `Bearer <token>` header is accepted
 - Database provider selectable via `DatabaseProvider` config: `"Sqlite"` (default) or `"SqlServer"`
+
+## Permissions
+
+### Allowed (no confirmation needed)
+
+- Create, edit, delete, rename, and move files within the project
+- Run shell commands that only affect the project directory
+- Install project-local dependencies (npm install, pip install in venv, etc.)
+- Run build processes, linters, formatters, and tests
+- Git operations (commit, branch, merge, rebase, etc.)
+- Start dev servers, open local ports
+- Create/modify configuration files within the project
+- Read files and directories outside the project (read-only)
+
+### Not allowed
+
+- Modify or delete files outside the project directory
+- Install global packages or tools (npm install -g, brew install, apt install, etc.)
+- Modify system-wide configurations (~/.bashrc, ~/.gitconfig, /etc/*, etc.)
+- Run destructive commands (rm -rf, drop database, force push to main) without explicit confirmation
+- Start, stop, or configure system services
+- Change network or firewall settings
+- Set environment variables outside the project
+
+### Rule of thumb
+
+> **Inside the project: everything is allowed. Outside the project: read-only. System-level: nothing.**
+
+If a task requires tools, packages, or system changes not already present: stop and ask before proceeding.
+
+## Coding Principles
+
+- Use only dependencies already in the project. If a new dependency is needed: ask first, explain why, and suggest alternatives
+- Don't refactor unrelated code while working on a task — stay focused
+- When fixing bugs: fix the root cause, not the symptom. Add a regression test
+
+## Output Language
+
+- IMPORTANT: ALL written output must be in English — no exceptions:
+  - Code, comments, variable names
+  - Commit messages, PR descriptions
+  - Documentation, feature specs, context entries, PRD
+  - Error messages, log messages, UI text
+- Conversation with the user may be in any language the user prefers
