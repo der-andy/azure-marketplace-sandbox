@@ -37,13 +37,24 @@ else
                     <label class="form-label">Max Qty</label>
                     <InputNumber class="form-control" @bind-Value="_newPlan.MaxQuantity" />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
+                    <label class="form-label">Billing</label>
+                    <InputSelect class="form-control" @bind-Value="_newPlan.BillingTermUnit">
+                        <option value="P1M">P1M</option>
+                        <option value="P1Y">P1Y</option>
+                    </InputSelect>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Term</label>
+                    <InputText class="form-control" @bind-Value="_newPlan.SubscriptionTermUnit" />
+                </div>
+                <div class="col-md-1">
                     <div class="form-check mt-4">
                         <InputCheckbox class="form-check-input" @bind-Value="_newPlan.IsPricePerSeat" />
                         <label class="form-check-label">Per Seat</label>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <button type="submit" class="btn btn-primary btn-sm">Add Plan</button>
                 </div>
             </div>
@@ -65,6 +76,8 @@ else
                 <tr>
                     <th>Plan ID</th>
                     <th>Display Name</th>
+                    <th>Billing</th>
+                    <th>Term</th>
                     <th>Per Seat</th>
                     <th>Min/Max Qty</th>
                     <th>Dimensions</th>
@@ -77,6 +90,8 @@ else
                     <tr>
                         <td>@plan.PlanId</td>
                         <td>@plan.DisplayName</td>
+                        <td>@plan.BillingTermUnit</td>
+                        <td>@plan.SubscriptionTermUnit</td>
                         <td>@(plan.IsPricePerSeat ? "Yes" : "No")</td>
                         <td>@plan.MinQuantity - @plan.MaxQuantity</td>
                         <td>@plan.PlanMeteringDimensions.Count</td>
@@ -204,12 +219,32 @@ else
             .FirstOrDefaultAsync(o => o.OfferId == OfferId);
     }
 
+    private static readonly System.Text.RegularExpressions.Regex TermUnitPattern = new(@"^P(\d+)([MY])$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
     private async Task AddPlan()
     {
         _planError = null;
         if (string.IsNullOrWhiteSpace(_newPlan.PlanId))
         {
             _planError = "Plan ID is required.";
+            return;
+        }
+        if (_newPlan.BillingTermUnit is not "P1M" and not "P1Y")
+        {
+            _planError = "Billing Term must be P1M or P1Y.";
+            return;
+        }
+        var termMatch = TermUnitPattern.Match(_newPlan.SubscriptionTermUnit);
+        if (!termMatch.Success)
+        {
+            _planError = "Subscription Term must match format P{amount}{M|Y}, e.g. P3M, P1Y.";
+            return;
+        }
+        var billingUnit = _newPlan.BillingTermUnit.EndsWith("Y", StringComparison.OrdinalIgnoreCase) ? "Y" : "M";
+        var termUnit = termMatch.Groups[2].Value.ToUpperInvariant();
+        if (billingUnit != termUnit)
+        {
+            _planError = "Subscription Term must use the same base unit (M/Y) as Billing Term.";
             return;
         }
         _newPlan.OfferId = OfferId;

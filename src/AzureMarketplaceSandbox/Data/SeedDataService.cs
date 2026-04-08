@@ -57,7 +57,9 @@ public class SeedDataService(
             MinQuantity = 0,
             MaxQuantity = 1,
             HasFreeTrials = false,
-            Market = "US"
+            Market = "US",
+            BillingTermUnit = "P1M",
+            SubscriptionTermUnit = "P1M"
         };
         var silverPlan = new Plan
         {
@@ -68,7 +70,9 @@ public class SeedDataService(
             MinQuantity = 1,
             MaxQuantity = 50,
             HasFreeTrials = true,
-            Market = "US"
+            Market = "US",
+            BillingTermUnit = "P1M",
+            SubscriptionTermUnit = "P3M"
         };
         var goldPlan = new Plan
         {
@@ -79,7 +83,9 @@ public class SeedDataService(
             MinQuantity = 1,
             MaxQuantity = 200,
             HasFreeTrials = false,
-            Market = "US"
+            Market = "US",
+            BillingTermUnit = "P1Y",
+            SubscriptionTermUnit = "P1Y"
         };
 
         var offer = new Offer

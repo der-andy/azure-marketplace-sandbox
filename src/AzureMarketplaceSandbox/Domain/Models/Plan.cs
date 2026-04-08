@@ -40,6 +40,12 @@ public class Plan
     public string Market { get; set; } = "US";
 
     [JsonIgnore]
+    public string BillingTermUnit { get; set; } = "P1M";
+
+    [JsonIgnore]
+    public string SubscriptionTermUnit { get; set; } = "P1M";
+
+    [JsonIgnore]
     public List<PlanMeteringDimension> PlanMeteringDimensions { get; set; } = [];
 
     [JsonPropertyName("meteringDimensions")]

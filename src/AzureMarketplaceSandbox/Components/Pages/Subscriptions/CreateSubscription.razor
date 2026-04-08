@@ -57,13 +57,6 @@
                 <InputCheckbox class="form-check-input" @bind-Value="_model.IsFreeTrial" />
                 <label class="form-check-label">Free Trial</label>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Term Unit</label>
-                <InputSelect class="form-control" @bind-Value="_model.TermUnit">
-                    <option value="P1M">Monthly (P1M)</option>
-                    <option value="P1Y">Yearly (P1Y)</option>
-                </InputSelect>
-            </div>
         </div>
     </div>
 
@@ -114,6 +107,13 @@
             return;
         }
 
+        var plan = offer.Plans.FirstOrDefault(p => p.PlanId == _model.PlanId);
+        if (plan is null)
+        {
+            _error = "Invalid plan.";
+            return;
+        }
+
         var subscription = new Subscription
         {
             Name = _model.Name,
@@ -135,7 +135,7 @@
             },
             Term = new SubscriptionTerm
             {
-                TermUnit = _model.TermUnit
+                TermUnit = plan.SubscriptionTermUnit
             },
             SaasSubscriptionStatus = SaasSubscriptionStatus.PendingFulfillmentStart
         };
@@ -155,6 +155,5 @@
         public string BeneficiaryEmail { get; set; } = "test@contoso.com";
         public string BeneficiaryTenantId { get; set; } = string.Empty;
         public bool IsFreeTrial { get; set; }
-        public string TermUnit { get; set; } = "P1M";
     }
 }
