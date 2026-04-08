@@ -31,11 +31,11 @@ else
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Min Qty</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.MinQuantity" />
+                    <InputNumber class="form-control" @bind-Value="_newPlan.MinQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Max Qty</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.MaxQuantity" />
+                    <InputNumber class="form-control" @bind-Value="_newPlan.MaxQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
                 </div>
                 <div class="col-md-1">
                     <label class="form-label">Billing</label>
@@ -93,7 +93,7 @@ else
                         <td>@plan.BillingTermUnit</td>
                         <td>@plan.SubscriptionTermUnit</td>
                         <td>@(plan.IsPricePerSeat ? "Yes" : "No")</td>
-                        <td>@plan.MinQuantity - @plan.MaxQuantity</td>
+                        <td>@(plan.IsPricePerSeat ? $"{plan.MinQuantity} - {plan.MaxQuantity}" : "-")</td>
                         <td>@plan.PlanMeteringDimensions.Count</td>
                         <td>
                             <button class="btn btn-sm btn-danger" @onclick="() => RemovePlan(plan)">Remove</button>
