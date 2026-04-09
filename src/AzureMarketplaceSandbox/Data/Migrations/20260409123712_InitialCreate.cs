@@ -249,13 +249,13 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         column: x => x.MeteringDimensionId,
                         principalTable: "MeteringDimensions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PlanMeteringDimensions_Plans_PlanId",
                         column: x => x.PlanId,
                         principalTable: "Plans",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

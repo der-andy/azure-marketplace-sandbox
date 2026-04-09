@@ -71,10 +71,12 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Plan)
                 .WithMany(p => p.PlanMeteringDimensions)
-                .HasForeignKey(e => e.PlanId);
+                .HasForeignKey(e => e.PlanId)
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(e => e.MeteringDimension)
                 .WithMany(d => d.PlanMeteringDimensions)
-                .HasForeignKey(e => e.MeteringDimensionId);
+                .HasForeignKey(e => e.MeteringDimensionId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Subscription>(entity =>

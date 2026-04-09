@@ -542,13 +542,13 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.HasOne("AzureMarketplaceSandbox.Domain.Models.MeteringDimension", "MeteringDimension")
                         .WithMany("PlanMeteringDimensions")
                         .HasForeignKey("MeteringDimensionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AzureMarketplaceSandbox.Domain.Models.Plan", "Plan")
                         .WithMany("PlanMeteringDimensions")
                         .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("MeteringDimension");
