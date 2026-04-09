@@ -26,14 +26,26 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AadInfo>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<SubscriptionTerm>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
         modelBuilder.Entity<MarketplaceToken>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Token).IsUnique();
             entity.Property(e => e.Token).HasMaxLength(256);
         });
 
         modelBuilder.Entity<Offer>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.OfferId).IsUnique();
             entity.Property(e => e.OfferId).HasMaxLength(128);
             entity.HasMany(e => e.Plans)
@@ -44,16 +56,19 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
         modelBuilder.Entity<Plan>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.Ignore(e => e.PlanComponents);
         });
 
         modelBuilder.Entity<MeteringDimension>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.Ignore(e => e.Currency);
         });
 
         modelBuilder.Entity<PlanMeteringDimension>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Plan)
                 .WithMany(p => p.PlanMeteringDimensions)
                 .HasForeignKey(e => e.PlanId);
@@ -64,6 +79,7 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
         modelBuilder.Entity<Subscription>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Beneficiary).WithMany().HasForeignKey("BeneficiaryId");
             entity.HasOne(e => e.Purchaser).WithMany().HasForeignKey("PurchaserId");
             entity.HasOne(e => e.Term).WithMany().HasForeignKey("TermId");
@@ -73,17 +89,20 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
         modelBuilder.Entity<Operation>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.Property(e => e.Action).HasConversion<string>();
             entity.Property(e => e.Status).HasConversion<string>();
         });
 
         modelBuilder.Entity<UsageEvent>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.Property(e => e.Status).HasConversion<string>();
         });
 
         modelBuilder.Entity<WebhookDeliveryLog>(entity =>
         {
+            entity.HasKey(e => e.Id);
             entity.Property(e => e.Action).HasConversion<string>();
         });
     }

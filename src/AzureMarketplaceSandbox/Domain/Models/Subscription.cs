@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using AzureMarketplaceSandbox.Domain.Enums;
@@ -7,7 +6,6 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 
 public class Subscription
 {
-    [Key]
     [JsonIgnore]
     public int Id { get; set; }
 

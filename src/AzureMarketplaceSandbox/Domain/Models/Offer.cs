@@ -1,11 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace AzureMarketplaceSandbox.Domain.Models;
 
 public class Offer
 {
-    [Key]
     [JsonIgnore]
     public int Id { get; set; }
 

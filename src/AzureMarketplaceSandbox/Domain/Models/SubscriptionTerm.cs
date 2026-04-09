@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -6,7 +5,6 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 
 public partial class SubscriptionTerm
 {
-    [Key]
     [JsonIgnore]
     public int Id { get; set; }
 

@@ -1,11 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using AzureMarketplaceSandbox.Domain.Enums;
 
 namespace AzureMarketplaceSandbox.Domain.Models;
 
 public class WebhookDeliveryLog
 {
-    [Key]
     public int Id { get; set; }
 
     public Guid WebhookDeliveryLogId { get; set; } = Guid.NewGuid();
