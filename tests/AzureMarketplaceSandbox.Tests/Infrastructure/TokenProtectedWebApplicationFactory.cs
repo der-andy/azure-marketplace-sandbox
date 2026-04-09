@@ -1,6 +1,4 @@
-using AzureMarketplaceSandbox.Auth;
 using AzureMarketplaceSandbox.Data;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -33,12 +31,6 @@ public class TokenProtectedWebApplicationFactory : WebApplicationFactory<Program
             services.AddDbContext<MarketplaceDbContext>(options =>
             {
                 options.UseInMemoryDatabase(_dbName);
-            });
-
-            services.Configure<AuthenticationOptions>(options =>
-            {
-                options.DefaultScheme = SandboxBearerHandler.SchemeName;
-                options.DefaultChallengeScheme = SandboxBearerHandler.SchemeName;
             });
         });
 

@@ -35,12 +35,6 @@ public class SandboxWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseInMemoryDatabase(_dbName);
             });
 
-            // Use SandboxBearer as default scheme so API tests are not affected by OIDC
-            services.Configure<AuthenticationOptions>(options =>
-            {
-                options.DefaultScheme = SandboxBearerHandler.SchemeName;
-                options.DefaultChallengeScheme = SandboxBearerHandler.SchemeName;
-            });
         });
 
         builder.UseEnvironment("Development");

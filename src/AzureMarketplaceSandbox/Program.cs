@@ -6,6 +6,7 @@ using AzureMarketplaceSandbox.Configuration;
 using AzureMarketplaceSandbox.Data;
 using AzureMarketplaceSandbox.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -23,18 +24,27 @@ builder.Services.AddDbContext<MarketplaceDbContext>(options =>
     options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
 
 // Authentication — Entra ID (OIDC + Cookies) for Admin UI, SandboxBearer for API
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-    .Services
-    .AddAuthentication()
-    .AddScheme<AuthenticationSchemeOptions, SandboxBearerHandler>(SandboxBearerHandler.SchemeName, null);
+builder.Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, SandboxBearerHandler>(SandboxBearerHandler.SchemeName, null)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
-builder.Services.AddAuthorization(options =>
+// Route authentication by path: /api → SandboxBearer, everything else → Cookies (OIDC)
+builder.Services.PostConfigure<AuthenticationOptions>(options =>
 {
-    options.AddPolicy("ApiPolicy", policy =>
-        policy.AddAuthenticationSchemes(SandboxBearerHandler.SchemeName)
-              .RequireAuthenticatedUser());
+    options.DefaultScheme = "RouteSelector";
+    options.DefaultChallengeScheme = "RouteSelector";
+    options.DefaultAuthenticateScheme = "RouteSelector";
 });
+builder.Services.AddAuthentication()
+    .AddPolicyScheme("RouteSelector", "RouteSelector", options =>
+    {
+        options.ForwardDefaultSelector = context =>
+            context.Request.Path.StartsWithSegments("/api")
+                ? SandboxBearerHandler.SchemeName
+                : CookieAuthenticationDefaults.AuthenticationScheme;
+    });
+
+builder.Services.AddAuthorization();
 
 // JSON serialization
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -73,6 +83,19 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
+// Disable status code pages for API paths so 401/404 are returned as-is
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api"))
+    {
+        var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IStatusCodePagesFeature>();
+        if (feature is not null)
+            feature.Enabled = false;
+    }
+    await next();
+});
+
 app.UseHttpsRedirection();
 
 // API middleware
