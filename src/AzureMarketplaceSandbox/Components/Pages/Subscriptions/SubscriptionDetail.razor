@@ -29,8 +29,8 @@ else
                 <tr><th>Publisher</th><td>@_sub.PublisherId</td></tr>
                 <tr><th>Free Trial</th><td>@(_sub.IsFreeTrial ? "Yes" : "No")</td></tr>
                 <tr><th>Auto Renew</th><td>@(_sub.AutoRenew ? "Yes" : "No")</td></tr>
-                <tr><th>Term</th><td>@_sub.Term.TermUnit (@_sub.Term.StartDate?.ToString("yyyy-MM-dd") - @_sub.Term.EndDate?.ToString("yyyy-MM-dd"))</td></tr>
-                <tr><th>Created</th><td>@_sub.Created.ToString("yyyy-MM-dd HH:mm:ss")</td></tr>
+                <tr><th>Term</th><td>@_sub.Term.TermUnit (@_sub.Term.StartDate?.ToString("yyyy-MMM-dd") - @_sub.Term.EndDate?.ToString("yyyy-MMM-dd"))</td></tr>
+                <tr><th>Created</th><td>@_sub.Created.ToString("yyyy-MMM-dd HH:mm:ss")</td></tr>
             </table>
         </div>
         <div class="col-md-6">
@@ -114,7 +114,7 @@ else
                 @foreach (var op in _operations)
                 {
                     <tr>
-                        <td>@op.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@op.TimeStamp.ToString("yyyy-MMM-dd HH:mm:ss")</td>
                         <td>@op.Action</td>
                         <td>@op.PlanId</td>
                         <td>@op.Quantity</td>

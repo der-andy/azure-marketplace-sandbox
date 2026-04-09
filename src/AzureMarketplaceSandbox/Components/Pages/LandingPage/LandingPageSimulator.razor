@@ -75,8 +75,8 @@ else
                 <tr>
                     <td><code>@t.Token[..Math.Min(20, t.Token.Length)]...</code></td>
                     <td>@t.SubscriptionId.ToString()[..8]...</td>
-                    <td>@t.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td>@t.ExpiresAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@t.CreatedAt.ToString("yyyy-MMM-dd HH:mm")</td>
+                    <td>@t.ExpiresAt.ToString("yyyy-MMM-dd HH:mm")</td>
                     <td>
                         @if (t.IsResolved)
                         {

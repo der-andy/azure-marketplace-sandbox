@@ -82,7 +82,7 @@ else
             @foreach (var log in _logs)
             {
                 <tr>
-                    <td>@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@log.Timestamp.ToString("yyyy-MMM-dd HH:mm:ss")</td>
                     <td>@log.SubscriptionId.ToString()[..8]...</td>
                     <td>@log.Action</td>
                     <td>

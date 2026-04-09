@@ -63,7 +63,7 @@
                 @foreach (var op in _recentOperations)
                 {
                     <tr>
-                        <td>@op.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        <td>@op.TimeStamp.ToString("yyyy-MMM-dd HH:mm:ss")</td>
                         <td><a href="subscriptions/@op.SubscriptionId">@op.SubscriptionId.ToString()[..8]...</a></td>
                         <td>@op.Action</td>
                         <td>

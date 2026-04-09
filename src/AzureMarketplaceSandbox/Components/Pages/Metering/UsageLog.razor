@@ -51,13 +51,13 @@ else
             @foreach (var e in _events)
             {
                 <tr>
-                    <td>@e.EffectiveStartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@e.EffectiveStartTime.ToString("yyyy-MMM-dd HH:mm")</td>
                     <td>@e.ResourceId.ToString()[..8]...</td>
                     <td>@e.PlanId</td>
                     <td>@e.Dimension</td>
                     <td>@e.Quantity</td>
                     <td><span class="badge @GetBadge(e.Status)">@e.Status</span></td>
-                    <td>@e.MessageTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@e.MessageTime.ToString("yyyy-MMM-dd HH:mm:ss")</td>
                 </tr>
             }
         </tbody>
