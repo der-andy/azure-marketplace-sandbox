@@ -22,7 +22,7 @@ builder.Services.AddDbContext<MarketplaceDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
     if (dbProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
     {
-        options.UseSqlServer(connectionString);
+        options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure());
     }
     else
     {
