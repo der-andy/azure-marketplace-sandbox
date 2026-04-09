@@ -6,6 +6,9 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 public class Offer
 {
     [Key]
+    [JsonIgnore]
+    public int Id { get; set; }
+
     [JsonPropertyName("offerId")]
     public string OfferId { get; set; } = string.Empty;
 

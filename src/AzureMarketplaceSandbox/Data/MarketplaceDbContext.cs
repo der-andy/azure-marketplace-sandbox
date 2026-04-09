@@ -26,24 +26,35 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<MarketplaceToken>(entity =>
+        {
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.Property(e => e.Token).HasMaxLength(256);
+        });
+
         modelBuilder.Entity<Offer>(entity =>
         {
-            entity.HasKey(e => e.OfferId);
+            entity.HasIndex(e => e.OfferId).IsUnique();
+            entity.Property(e => e.OfferId).HasMaxLength(128);
             entity.HasMany(e => e.Plans)
                 .WithOne(p => p.Offer)
-                .HasForeignKey(p => p.OfferId);
+                .HasForeignKey(p => p.OfferId)
+                .HasPrincipalKey(e => e.OfferId);
             entity.HasMany(e => e.MeteringDimensions)
                 .WithOne(d => d.Offer)
-                .HasForeignKey(d => d.OfferId);
+                .HasForeignKey(d => d.OfferId)
+                .HasPrincipalKey(e => e.OfferId);
         });
 
         modelBuilder.Entity<Plan>(entity =>
         {
+            entity.Property(e => e.OfferId).HasMaxLength(128);
             entity.Ignore(e => e.PlanComponents);
         });
 
         modelBuilder.Entity<MeteringDimension>(entity =>
         {
+            entity.Property(e => e.OfferId).HasMaxLength(128);
             entity.Ignore(e => e.Currency);
         });
 

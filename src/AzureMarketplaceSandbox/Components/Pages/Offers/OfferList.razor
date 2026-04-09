@@ -107,7 +107,7 @@ else
 
     private async Task DeleteOffer(string offerId)
     {
-        var offer = await Db.Offers.FindAsync(offerId);
+        var offer = await Db.Offers.FirstOrDefaultAsync(o => o.OfferId == offerId);
         if (offer is not null)
         {
             Db.Offers.Remove(offer);

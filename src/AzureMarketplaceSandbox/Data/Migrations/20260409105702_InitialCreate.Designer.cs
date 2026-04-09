@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AzureMarketplaceSandbox.Data.Migrations
 {
     [DbContext(typeof(MarketplaceDbContext))]
-    [Migration("20260402140257_InitialCreate")]
+    [Migration("20260409105702_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -55,8 +55,9 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.MarketplaceToken", b =>
                 {
-                    b.Property<string>("Token")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -70,7 +71,15 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.Property<Guid>("SubscriptionId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Token");
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
 
                     b.ToTable("MarketplaceTokens");
                 });
@@ -80,11 +89,6 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasJsonPropertyName("currency");
 
                     b.Property<string>("DimensionId")
                         .IsRequired()
@@ -96,8 +100,10 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("displayName");
 
-                    b.Property<int>("PlanId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("OfferId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("PricePerUnit")
                         .HasColumnType("TEXT")
@@ -110,30 +116,42 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlanId");
+                    b.HasIndex("OfferId");
 
                     b.ToTable("MeteringDimensions");
-
-                    b.HasAnnotation("Relational:JsonPropertyName", "meteringDimensions");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Offer", b =>
                 {
-                    b.Property<string>("OfferId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasJsonPropertyName("offerId");
+                        .HasJsonPropertyName("currency");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("displayName");
 
+                    b.Property<string>("OfferId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasJsonPropertyName("offerId");
+
                     b.Property<string>("PublisherId")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("publisherId");
 
-                    b.HasKey("OfferId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfferId")
+                        .IsUnique();
 
                     b.ToTable("Offers");
                 });
@@ -209,6 +227,10 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BillingTermUnit")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -250,12 +272,24 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
                     b.Property<string>("OfferId")
                         .IsRequired()
+                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PlanId")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("planId");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubscriptionTermUnit")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TermDescription")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -264,6 +298,24 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.ToTable("Plans");
 
                     b.HasAnnotation("Relational:JsonPropertyName", "plans");
+                });
+
+            modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.PlanMeteringDimension", b =>
+                {
+                    b.Property<int>("PlanId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MeteringDimensionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("IncludedQuantity")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("PlanId", "MeteringDimensionId");
+
+                    b.HasIndex("MeteringDimensionId");
+
+                    b.ToTable("PlanMeteringDimensions");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Subscription", b =>
@@ -399,8 +451,8 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("planId");
 
-                    b.Property<double>("Quantity")
-                        .HasColumnType("REAL")
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("TEXT")
                         .HasJsonPropertyName("quantity");
 
                     b.Property<Guid>("ResourceId")
@@ -456,13 +508,14 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.MeteringDimension", b =>
                 {
-                    b.HasOne("AzureMarketplaceSandbox.Domain.Models.Plan", "Plan")
+                    b.HasOne("AzureMarketplaceSandbox.Domain.Models.Offer", "Offer")
                         .WithMany("MeteringDimensions")
-                        .HasForeignKey("PlanId")
+                        .HasForeignKey("OfferId")
+                        .HasPrincipalKey("OfferId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Plan");
+                    b.Navigation("Offer");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Operation", b =>
@@ -481,10 +534,30 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.HasOne("AzureMarketplaceSandbox.Domain.Models.Offer", "Offer")
                         .WithMany("Plans")
                         .HasForeignKey("OfferId")
+                        .HasPrincipalKey("OfferId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Offer");
+                });
+
+            modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.PlanMeteringDimension", b =>
+                {
+                    b.HasOne("AzureMarketplaceSandbox.Domain.Models.MeteringDimension", "MeteringDimension")
+                        .WithMany("PlanMeteringDimensions")
+                        .HasForeignKey("MeteringDimensionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AzureMarketplaceSandbox.Domain.Models.Plan", "Plan")
+                        .WithMany("PlanMeteringDimensions")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MeteringDimension");
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Subscription", b =>
@@ -514,14 +587,21 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.Navigation("Term");
                 });
 
+            modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.MeteringDimension", b =>
+                {
+                    b.Navigation("PlanMeteringDimensions");
+                });
+
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Offer", b =>
                 {
+                    b.Navigation("MeteringDimensions");
+
                     b.Navigation("Plans");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Plan", b =>
                 {
-                    b.Navigation("MeteringDimensions");
+                    b.Navigation("PlanMeteringDimensions");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Subscription", b =>
