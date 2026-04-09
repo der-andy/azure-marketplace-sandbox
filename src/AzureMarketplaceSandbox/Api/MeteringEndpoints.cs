@@ -36,7 +36,7 @@ public static class MeteringEndpoints
                     code = result.Status.ToString()
                 })
             };
-        }).RequireAuthorization();
+        }).RequireAuthorization("ApiPolicy");
 
         // POST /api/batchUsageEvent
         app.MapPost("/api/batchUsageEvent", async (
@@ -81,7 +81,7 @@ public static class MeteringEndpoints
                         planId = r.PlanId
                     }).ToList()
             });
-        }).RequireAuthorization();
+        }).RequireAuthorization("ApiPolicy");
 
         // GET /api/usageEvents
         app.MapGet("/api/usageEvents", async (
@@ -96,7 +96,7 @@ public static class MeteringEndpoints
                 usageStartDate, usageEndDate, offerId, planId, dimension);
 
             return Results.Ok(events);
-        }).RequireAuthorization();
+        }).RequireAuthorization("ApiPolicy");
     }
 
     private record BatchUsageEventRequest

@@ -7,7 +7,7 @@ public static class FulfillmentOperationsEndpoints
     public static void MapFulfillmentOperationsApi(this WebApplication app)
     {
         var group = app.MapGroup("/api/saas/subscriptions/{subscriptionId:guid}/operations")
-            .RequireAuthorization();
+            .RequireAuthorization("ApiPolicy");
 
         // GET / (list pending operations)
         group.MapGet("/", async (Guid subscriptionId, OperationService operationService) =>

@@ -12,7 +12,7 @@ public static class FulfillmentSubscriptionEndpoints
     public static void MapFulfillmentSubscriptionApi(this WebApplication app)
     {
         var group = app.MapGroup("/api/saas/subscriptions")
-            .RequireAuthorization();
+            .RequireAuthorization("ApiPolicy");
 
         // POST /resolve
         group.MapPost("/resolve", async (

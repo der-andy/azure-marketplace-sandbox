@@ -1,6 +1,14 @@
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Marketplace Sandbox</a>
+        <div class="d-flex align-items-center text-white ms-auto">
+            <AuthorizeView>
+                <Authorized>
+                    <span class="me-2 small">@context.User.Identity?.Name</span>
+                    <a href="authentication/logout" class="btn btn-outline-light btn-sm">Logout</a>
+                </Authorized>
+            </AuthorizeView>
+        </div>
     </div>
 </div>
 

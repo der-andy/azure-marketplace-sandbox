@@ -1,4 +1,6 @@
+using AzureMarketplaceSandbox.Auth;
 using AzureMarketplaceSandbox.Data;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,10 @@ public class SandboxWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Provide dummy AzureAd config so OIDC middleware does not throw
+        builder.UseSetting("AzureAd:TenantId", "00000000-0000-0000-0000-000000000000");
+        builder.UseSetting("AzureAd:ClientId", "00000000-0000-0000-0000-000000000000");
+
         builder.ConfigureServices(services =>
         {
             // Remove all DbContext-related registrations
@@ -27,6 +33,13 @@ public class SandboxWebApplicationFactory : WebApplicationFactory<Program>
             services.AddDbContext<MarketplaceDbContext>(options =>
             {
                 options.UseInMemoryDatabase(_dbName);
+            });
+
+            // Use SandboxBearer as default scheme so API tests are not affected by OIDC
+            services.Configure<AuthenticationOptions>(options =>
+            {
+                options.DefaultScheme = SandboxBearerHandler.SchemeName;
+                options.DefaultChallengeScheme = SandboxBearerHandler.SchemeName;
             });
         });
 

@@ -6,7 +6,9 @@ using AzureMarketplaceSandbox.Configuration;
 using AzureMarketplaceSandbox.Data;
 using AzureMarketplaceSandbox.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +22,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<MarketplaceDbContext>(options =>
     options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
 
-// Authentication
-builder.Services.AddAuthentication(SandboxBearerHandler.SchemeName)
+// Authentication — Entra ID (OIDC + Cookies) for Admin UI, SandboxBearer for API
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+    .Services
+    .AddAuthentication()
     .AddScheme<AuthenticationSchemeOptions, SandboxBearerHandler>(SandboxBearerHandler.SchemeName, null);
-builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ApiPolicy", policy =>
+        policy.AddAuthenticationSchemes(SandboxBearerHandler.SchemeName)
+              .RequireAuthenticatedUser());
+});
 
 // JSON serialization
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -77,9 +88,17 @@ app.MapFulfillmentSubscriptionApi();
 app.MapFulfillmentOperationsApi();
 app.MapMeteringApi();
 
+// Authentication endpoints
+app.MapGet("/authentication/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+    await context.SignOutAsync("Cookies");
+}).AllowAnonymous();
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .RequireAuthorization();
 
 // Startup banner
 var sandboxConfig = builder.Configuration.GetSection(SandboxOptions.SectionName).Get<SandboxOptions>() ?? new SandboxOptions();
