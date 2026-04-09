@@ -33,7 +33,7 @@ else
             @foreach (var sub in _subscriptions)
             {
                 <tr>
-                    <td><a href="subscriptions/@sub.Id">@sub.Id.ToString()[..8]...</a></td>
+                    <td><a href="subscriptions/@sub.SubscriptionId">@sub.SubscriptionId.ToString()[..8]...</a></td>
                     <td>@sub.Name</td>
                     <td>@sub.OfferId</td>
                     <td>@sub.PlanId</td>

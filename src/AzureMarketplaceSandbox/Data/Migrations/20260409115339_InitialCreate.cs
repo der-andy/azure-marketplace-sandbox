@@ -58,6 +58,29 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Operations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false),
+                    OperationId = table.Column<Guid>(nullable: false),
+                    ActivityId = table.Column<Guid>(nullable: false),
+                    SubscriptionId = table.Column<Guid>(nullable: false),
+                    OfferId = table.Column<string>(nullable: false),
+                    PublisherId = table.Column<string>(nullable: false),
+                    PlanId = table.Column<string>(nullable: false),
+                    Quantity = table.Column<int>(nullable: true),
+                    Action = table.Column<string>(nullable: false),
+                    TimeStamp = table.Column<DateTime>(nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    ErrorStatusCode = table.Column<string>(nullable: false),
+                    ErrorMessage = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Operations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SubscriptionTerm",
                 columns: table => new
                 {
@@ -75,6 +98,7 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 name: "UsageEvents",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false),
                     UsageEventId = table.Column<Guid>(nullable: false),
                     Status = table.Column<string>(nullable: false),
                     MessageTime = table.Column<DateTime>(nullable: false),
@@ -86,14 +110,15 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UsageEvents", x => x.UsageEventId);
+                    table.PrimaryKey("PK_UsageEvents", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "WebhookDeliveryLogs",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
+                    WebhookDeliveryLogId = table.Column<Guid>(nullable: false),
                     SubscriptionId = table.Column<Guid>(nullable: false),
                     Action = table.Column<string>(nullable: false),
                     PayloadJson = table.Column<string>(nullable: false),
@@ -166,7 +191,8 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 name: "Subscriptions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
+                    SubscriptionId = table.Column<Guid>(nullable: false),
                     Name = table.Column<string>(nullable: false),
                     PublisherId = table.Column<string>(nullable: false),
                     OfferId = table.Column<string>(nullable: false),
@@ -210,13 +236,14 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 name: "PlanMeteringDimensions",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false),
                     PlanId = table.Column<int>(nullable: false),
                     MeteringDimensionId = table.Column<int>(nullable: false),
                     IncludedQuantity = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlanMeteringDimensions", x => new { x.PlanId, x.MeteringDimensionId });
+                    table.PrimaryKey("PK_PlanMeteringDimensions", x => x.Id);
                     table.ForeignKey(
                         name: "FK_PlanMeteringDimensions_MeteringDimensions_MeteringDimensionId",
                         column: x => x.MeteringDimensionId,
@@ -227,34 +254,6 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         name: "FK_PlanMeteringDimensions_Plans_PlanId",
                         column: x => x.PlanId,
                         principalTable: "Plans",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Operations",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    ActivityId = table.Column<Guid>(nullable: false),
-                    SubscriptionId = table.Column<Guid>(nullable: false),
-                    OfferId = table.Column<string>(nullable: false),
-                    PublisherId = table.Column<string>(nullable: false),
-                    PlanId = table.Column<string>(nullable: false),
-                    Quantity = table.Column<int>(nullable: true),
-                    Action = table.Column<string>(nullable: false),
-                    TimeStamp = table.Column<DateTime>(nullable: false),
-                    Status = table.Column<string>(nullable: false),
-                    ErrorStatusCode = table.Column<string>(nullable: false),
-                    ErrorMessage = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Operations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Operations_Subscriptions_SubscriptionId",
-                        column: x => x.SubscriptionId,
-                        principalTable: "Subscriptions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -277,14 +276,14 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Operations_SubscriptionId",
-                table: "Operations",
-                column: "SubscriptionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PlanMeteringDimensions_MeteringDimensionId",
                 table: "PlanMeteringDimensions",
                 column: "MeteringDimensionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlanMeteringDimensions_PlanId",
+                table: "PlanMeteringDimensions",
+                column: "PlanId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Plans_OfferId",
@@ -320,13 +319,13 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 name: "PlanMeteringDimensions");
 
             migrationBuilder.DropTable(
+                name: "Subscriptions");
+
+            migrationBuilder.DropTable(
                 name: "UsageEvents");
 
             migrationBuilder.DropTable(
                 name: "WebhookDeliveryLogs");
-
-            migrationBuilder.DropTable(
-                name: "Subscriptions");
 
             migrationBuilder.DropTable(
                 name: "MeteringDimensions");

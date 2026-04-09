@@ -151,7 +151,7 @@
         Db.Subscriptions.Add(subscription);
         await Db.SaveChangesAsync();
 
-        Nav.NavigateTo($"subscriptions/{subscription.Id}");
+        Nav.NavigateTo($"subscriptions/{subscription.SubscriptionId}");
     }
 
     private class CreateModel

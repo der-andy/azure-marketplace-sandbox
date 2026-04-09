@@ -8,8 +8,11 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 public class Subscription
 {
     [Key]
+    [JsonIgnore]
+    public int Id { get; set; }
+
     [JsonPropertyName("id")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid SubscriptionId { get; set; } = Guid.NewGuid();
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -60,6 +63,4 @@ public class Subscription
     [JsonPropertyName("created")]
     public DateTime Created { get; set; } = DateTime.UtcNow;
 
-    [JsonIgnore]
-    public List<Operation> Operations { get; set; } = [];
 }

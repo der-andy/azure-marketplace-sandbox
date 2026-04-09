@@ -7,6 +7,9 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 public class UsageEvent
 {
     [Key]
+    [JsonIgnore]
+    public int Id { get; set; }
+
     [JsonPropertyName("usageEventId")]
     public Guid UsageEventId { get; set; } = Guid.NewGuid();
 

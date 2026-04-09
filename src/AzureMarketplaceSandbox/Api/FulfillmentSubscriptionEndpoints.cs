@@ -42,7 +42,7 @@ public static class FulfillmentSubscriptionEndpoints
 
             return Results.Ok(new
             {
-                id = subscription.Id,
+                id = subscription.SubscriptionId,
                 subscriptionName = subscription.Name,
                 offerId = subscription.OfferId,
                 planId = subscription.PlanId,
@@ -108,7 +108,7 @@ public static class FulfillmentSubscriptionEndpoints
             SubscriptionService subscriptionService,
             MarketplaceDbContext db) =>
         {
-            var subscription = await db.Subscriptions.FindAsync(subscriptionId);
+            var subscription = await db.Subscriptions.FirstOrDefaultAsync(s => s.SubscriptionId == subscriptionId);
             if (subscription is null)
             {
                 return Results.NotFound();
@@ -155,7 +155,7 @@ public static class FulfillmentSubscriptionEndpoints
             }
 
             var baseUrl = sandboxOptions.Value.BaseUrl.TrimEnd('/');
-            var operationLocation = $"{baseUrl}/api/saas/subscriptions/{subscriptionId}/operations/{operation.Id}?api-version=2018-08-31";
+            var operationLocation = $"{baseUrl}/api/saas/subscriptions/{subscriptionId}/operations/{operation.OperationId}?api-version=2018-08-31";
             context.Response.Headers["Operation-Location"] = operationLocation;
 
             // Fire webhook asynchronously
@@ -163,7 +163,7 @@ public static class FulfillmentSubscriptionEndpoints
                 ? Domain.Enums.OperationAction.ChangePlan
                 : Domain.Enums.OperationAction.ChangeQuantity;
             _ = webhookService.SendWebhookAsync(subscriptionId, action,
-                newPlanId: body.PlanId, newQuantity: body.Quantity, operationId: operation.Id);
+                newPlanId: body.PlanId, newQuantity: body.Quantity, operationId: operation.OperationId);
 
             return Results.Accepted(operationLocation);
         });
@@ -195,11 +195,11 @@ public static class FulfillmentSubscriptionEndpoints
             }
 
             var baseUrl = sandboxOptions.Value.BaseUrl.TrimEnd('/');
-            var operationLocation = $"{baseUrl}/api/saas/subscriptions/{subscriptionId}/operations/{operation.Id}?api-version=2018-08-31";
+            var operationLocation = $"{baseUrl}/api/saas/subscriptions/{subscriptionId}/operations/{operation.OperationId}?api-version=2018-08-31";
             context.Response.Headers["Operation-Location"] = operationLocation;
 
             _ = webhookService.SendWebhookAsync(subscriptionId, Domain.Enums.OperationAction.Unsubscribe,
-                operationId: operation.Id);
+                operationId: operation.OperationId);
 
             return Results.Accepted(operationLocation);
         });

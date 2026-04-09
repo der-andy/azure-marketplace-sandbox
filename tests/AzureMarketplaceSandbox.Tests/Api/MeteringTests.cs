@@ -41,7 +41,7 @@ public class MeteringTests
             });
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "offer1",
                 PublisherId = "pub1",
@@ -112,7 +112,7 @@ public class MeteringTests
             });
             seedDb.Subscriptions.Add(new Subscription
             {
-                Id = subId, Name = "Test", OfferId = "offer1", PublisherId = "pub1",
+                SubscriptionId = subId, Name = "Test", OfferId = "offer1", PublisherId = "pub1",
                 PlanId = "silver", Quantity = 5,
                 SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed,
                 Beneficiary = new AadInfo { EmailId = "t@t.com" },

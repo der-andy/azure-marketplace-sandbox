@@ -19,7 +19,7 @@ else
     <div class="row">
         <div class="col-md-6">
             <table class="table table-sm">
-                <tr><th>ID</th><td>@_sub.Id</td></tr>
+                <tr><th>ID</th><td>@_sub.SubscriptionId</td></tr>
                 <tr><th>Offer</th><td>@_sub.OfferId</td></tr>
                 <tr><th>Plan</th><td>@_sub.PlanId</td></tr>
                 <tr><th>Quantity</th><td>@_sub.Quantity</td></tr>
@@ -166,7 +166,7 @@ else
         Db.Operations.Add(op);
         _sub!.SaasSubscriptionStatus = SaasSubscriptionStatus.Suspended;
         await Db.SaveChangesAsync();
-        _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Suspend, operationId: op.Id);
+        _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Suspend, operationId: op.OperationId);
         SetMessage("Subscription suspended.", false);
         await LoadData();
     }
@@ -177,7 +177,7 @@ else
         Db.Operations.Add(op);
         _sub!.SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed;
         await Db.SaveChangesAsync();
-        _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Reinstate, operationId: op.Id);
+        _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Reinstate, operationId: op.OperationId);
         SetMessage("Subscription reinstated.", false);
         await LoadData();
     }
@@ -187,7 +187,7 @@ else
         var op = await SubService.UnsubscribeAsync(SubscriptionId);
         if (op is not null)
         {
-            _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Unsubscribe, operationId: op.Id);
+            _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Unsubscribe, operationId: op.OperationId);
             // Immediately apply for admin action
             op.Status = OperationStatus.Succeeded;
             _sub!.SaasSubscriptionStatus = SaasSubscriptionStatus.Unsubscribed;
@@ -207,7 +207,7 @@ else
         if (op is not null)
         {
             _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.ChangePlan,
-                newPlanId: _newPlanId, operationId: op.Id);
+                newPlanId: _newPlanId, operationId: op.OperationId);
             SetMessage($"ChangePlan operation created (InProgress). Webhook sent.", false);
         }
         else
@@ -224,7 +224,7 @@ else
         if (op is not null)
         {
             _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.ChangeQuantity,
-                newQuantity: _newQuantity, operationId: op.Id);
+                newQuantity: _newQuantity, operationId: op.OperationId);
             SetMessage($"ChangeQuantity operation created (InProgress). Webhook sent.", false);
         }
         else

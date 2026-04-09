@@ -39,7 +39,7 @@ public class WebhookService(
             .Include(s => s.Beneficiary)
             .Include(s => s.Purchaser)
             .Include(s => s.Term)
-            .FirstOrDefaultAsync(s => s.Id == subscriptionId);
+            .FirstOrDefaultAsync(s => s.SubscriptionId == subscriptionId);
 
         if (subscription is null)
         {

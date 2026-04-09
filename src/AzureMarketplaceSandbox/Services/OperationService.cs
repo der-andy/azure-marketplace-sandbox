@@ -18,7 +18,7 @@ public class OperationService(MarketplaceDbContext db)
     public async Task<Operation?> GetAsync(Guid subscriptionId, Guid operationId)
     {
         return await db.Operations
-            .FirstOrDefaultAsync(o => o.Id == operationId && o.SubscriptionId == subscriptionId);
+            .FirstOrDefaultAsync(o => o.OperationId == operationId && o.SubscriptionId == subscriptionId);
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ public class OperationService(MarketplaceDbContext db)
         Guid subscriptionId, Guid operationId, string status)
     {
         var operation = await db.Operations
-            .FirstOrDefaultAsync(o => o.Id == operationId && o.SubscriptionId == subscriptionId);
+            .FirstOrDefaultAsync(o => o.OperationId == operationId && o.SubscriptionId == subscriptionId);
 
         if (operation is null)
             return (false, false, null);
@@ -38,7 +38,7 @@ public class OperationService(MarketplaceDbContext db)
 
         var subscription = await db.Subscriptions
             .Include(s => s.Term)
-            .FirstOrDefaultAsync(s => s.Id == subscriptionId);
+            .FirstOrDefaultAsync(s => s.SubscriptionId == subscriptionId);
 
         if (subscription is null)
             return (false, false, null);

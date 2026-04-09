@@ -5,6 +5,9 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 public class PlanMeteringDimension
 {
     [JsonIgnore]
+    public int Id { get; set; }
+
+    [JsonIgnore]
     public int PlanId { get; set; }
 
     [JsonIgnore]

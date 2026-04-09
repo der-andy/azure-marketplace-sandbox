@@ -67,7 +67,7 @@ public class MeteringService(MarketplaceDbContext db)
         {
             var subscriptionIds = await db.Subscriptions
                 .Where(s => s.OfferId == offerId)
-                .Select(s => s.Id)
+                .Select(s => s.SubscriptionId)
                 .ToListAsync();
             query = query.Where(e => subscriptionIds.Contains(e.ResourceId));
         }
@@ -95,7 +95,7 @@ public class MeteringService(MarketplaceDbContext db)
         if (request.EffectiveStartTime < DateTime.UtcNow.AddHours(-24))
             return UsageEventStatus.Expired;
 
-        var subscription = await db.Subscriptions.FindAsync(request.ResourceId);
+        var subscription = await db.Subscriptions.FirstOrDefaultAsync(s => s.SubscriptionId == request.ResourceId);
         if (subscription is null)
             return UsageEventStatus.ResourceNotFound;
 

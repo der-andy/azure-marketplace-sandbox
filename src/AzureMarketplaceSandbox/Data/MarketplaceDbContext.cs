@@ -54,7 +54,6 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
         modelBuilder.Entity<PlanMeteringDimension>(entity =>
         {
-            entity.HasKey(e => new { e.PlanId, e.MeteringDimensionId });
             entity.HasOne(e => e.Plan)
                 .WithMany(p => p.PlanMeteringDimensions)
                 .HasForeignKey(e => e.PlanId);
@@ -68,9 +67,6 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
             entity.HasOne(e => e.Beneficiary).WithMany().HasForeignKey("BeneficiaryId");
             entity.HasOne(e => e.Purchaser).WithMany().HasForeignKey("PurchaserId");
             entity.HasOne(e => e.Term).WithMany().HasForeignKey("TermId");
-            entity.HasMany(e => e.Operations)
-                .WithOne(o => o.Subscription)
-                .HasForeignKey(o => o.SubscriptionId);
             entity.Property(e => e.SaasSubscriptionStatus).HasConversion<string>();
             entity.Ignore(e => e.AllowedCustomerOperations);
         });

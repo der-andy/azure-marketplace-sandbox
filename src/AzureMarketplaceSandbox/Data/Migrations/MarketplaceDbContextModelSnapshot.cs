@@ -153,10 +153,9 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Operation", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasJsonPropertyName("id");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Action")
                         .IsRequired()
@@ -181,6 +180,10 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("offerId");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("TEXT")
+                        .HasJsonPropertyName("id");
 
                     b.Property<string>("PlanId")
                         .IsRequired()
@@ -210,8 +213,6 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .HasJsonPropertyName("timeStamp");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SubscriptionId");
 
                     b.ToTable("Operations");
                 });
@@ -295,28 +296,33 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.PlanMeteringDimension", b =>
                 {
-                    b.Property<int>("PlanId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MeteringDimensionId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("IncludedQuantity")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("PlanId", "MeteringDimensionId");
+                    b.Property<int>("MeteringDimensionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlanId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("MeteringDimensionId");
+
+                    b.HasIndex("PlanId");
 
                     b.ToTable("PlanMeteringDimensions");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Subscription", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasJsonPropertyName("id");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("AutoRenew")
                         .HasColumnType("INTEGER")
@@ -379,6 +385,10 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("sessionMode");
 
+                    b.Property<Guid>("SubscriptionId")
+                        .HasColumnType("TEXT")
+                        .HasJsonPropertyName("id");
+
                     b.Property<int>("TermId")
                         .HasColumnType("INTEGER");
 
@@ -421,10 +431,9 @@ namespace AzureMarketplaceSandbox.Data.Migrations
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.UsageEvent", b =>
                 {
-                    b.Property<Guid>("UsageEventId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasJsonPropertyName("usageEventId");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Dimension")
                         .IsRequired()
@@ -457,16 +466,20 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasJsonPropertyName("status");
 
-                    b.HasKey("UsageEventId");
+                    b.Property<Guid>("UsageEventId")
+                        .HasColumnType("TEXT")
+                        .HasJsonPropertyName("usageEventId");
+
+                    b.HasKey("Id");
 
                     b.ToTable("UsageEvents");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.WebhookDeliveryLog", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Action")
                         .IsRequired()
@@ -494,6 +507,9 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("WebhookDeliveryLogId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.ToTable("WebhookDeliveryLogs");
@@ -508,17 +524,6 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Offer");
-                });
-
-            modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Operation", b =>
-                {
-                    b.HasOne("AzureMarketplaceSandbox.Domain.Models.Subscription", "Subscription")
-                        .WithMany("Operations")
-                        .HasForeignKey("SubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Subscription");
                 });
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Plan", b =>
@@ -593,11 +598,6 @@ namespace AzureMarketplaceSandbox.Data.Migrations
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Plan", b =>
                 {
                     b.Navigation("PlanMeteringDimensions");
-                });
-
-            modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.Subscription", b =>
-                {
-                    b.Navigation("Operations");
                 });
 #pragma warning restore 612, 618
         }

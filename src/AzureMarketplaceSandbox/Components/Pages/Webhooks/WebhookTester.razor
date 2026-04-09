@@ -18,7 +18,7 @@
                 <option value="">-- Select --</option>
                 @foreach (var sub in _subscriptions)
                 {
-                    <option value="@sub.Id">@sub.Name (@sub.Id.ToString()[..8]...) - @sub.SaasSubscriptionStatus</option>
+                    <option value="@sub.SubscriptionId">@sub.Name (@sub.SubscriptionId.ToString()[..8]...) - @sub.SaasSubscriptionStatus</option>
                 }
             </InputSelect>
         </div>
@@ -136,7 +136,7 @@ else
     private int _newQuantity = 1;
     private string? _sendMessage;
     private bool _sendError;
-    private Guid? _expandedLogId;
+    private int? _expandedLogId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -179,7 +179,7 @@ else
         await LoadLogs();
     }
 
-    private void ToggleDetail(Guid logId)
+    private void ToggleDetail(int logId)
     {
         _expandedLogId = _expandedLogId == logId ? null : logId;
     }

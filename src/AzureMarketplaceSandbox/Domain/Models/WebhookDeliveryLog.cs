@@ -6,7 +6,9 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 public class WebhookDeliveryLog
 {
     [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public int Id { get; set; }
+
+    public Guid WebhookDeliveryLogId { get; set; } = Guid.NewGuid();
 
     public Guid SubscriptionId { get; set; }
 

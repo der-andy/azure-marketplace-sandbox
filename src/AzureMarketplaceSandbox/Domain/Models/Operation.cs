@@ -7,8 +7,11 @@ namespace AzureMarketplaceSandbox.Domain.Models;
 public class Operation
 {
     [Key]
+    [JsonIgnore]
+    public int Id { get; set; }
+
     [JsonPropertyName("id")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid OperationId { get; set; } = Guid.NewGuid();
 
     [JsonPropertyName("activityId")]
     public Guid ActivityId { get; set; } = Guid.NewGuid();
@@ -43,6 +46,4 @@ public class Operation
     [JsonPropertyName("errorMessage")]
     public string ErrorMessage { get; set; } = string.Empty;
 
-    [JsonIgnore]
-    public Subscription Subscription { get; set; } = null!;
 }

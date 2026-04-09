@@ -13,7 +13,7 @@ public class SubscriptionService(MarketplaceDbContext db)
             .Include(s => s.Beneficiary)
             .Include(s => s.Purchaser)
             .Include(s => s.Term)
-            .FirstOrDefaultAsync(s => s.Id == subscriptionId);
+            .FirstOrDefaultAsync(s => s.SubscriptionId == subscriptionId);
     }
 
     public async Task<(List<Subscription> Items, string? NextLink)> ListAsync(string? continuationToken, int pageSize = 10)
@@ -47,7 +47,7 @@ public class SubscriptionService(MarketplaceDbContext db)
 
     public async Task<List<Plan>> ListAvailablePlansAsync(Guid subscriptionId)
     {
-        var subscription = await db.Subscriptions.FindAsync(subscriptionId);
+        var subscription = await db.Subscriptions.FirstOrDefaultAsync(s => s.SubscriptionId == subscriptionId);
         if (subscription is null)
             return [];
 

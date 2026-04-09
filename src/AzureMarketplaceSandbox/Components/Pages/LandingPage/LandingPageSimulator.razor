@@ -18,7 +18,7 @@
                 <option value="">-- Select --</option>
                 @foreach (var sub in _pendingSubscriptions)
                 {
-                    <option value="@sub.Id">@sub.Name (@sub.Id.ToString()[..8]...)</option>
+                    <option value="@sub.SubscriptionId">@sub.Name (@sub.SubscriptionId.ToString()[..8]...)</option>
                 }
             </InputSelect>
         </div>

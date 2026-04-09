@@ -22,7 +22,7 @@ public class FulfillmentOperationsTests
             db.Offers.Add(offer);
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "offer1",
                 PublisherId = "pub1",
@@ -82,7 +82,7 @@ public class FulfillmentOperationsTests
             db.Offers.Add(offer);
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "offer1",
                 PublisherId = "pub1",

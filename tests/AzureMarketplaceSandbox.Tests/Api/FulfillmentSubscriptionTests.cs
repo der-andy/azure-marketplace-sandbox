@@ -63,7 +63,7 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
             db.Offers.Add(offer);
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test Sub",
                 OfferId = "test-offer",
                 PublisherId = "pub1",
@@ -100,7 +100,7 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
             db.Offers.Add(new Offer { OfferId = "o", PublisherId = "p", DisplayName = "O" });
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "o",
                 PublisherId = "p",
@@ -131,7 +131,7 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
             db.Offers.Add(offer);
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "test-offer",
                 PublisherId = "pub1",
@@ -168,7 +168,7 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
         {
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "o",
                 PublisherId = "p",
@@ -201,7 +201,7 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
             db.Offers.Add(offer);
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "offer1",
                 PublisherId = "pub1",
@@ -233,7 +233,7 @@ public class FulfillmentSubscriptionTests : IClassFixture<SandboxWebApplicationF
         {
             db.Subscriptions.Add(new Subscription
             {
-                Id = subId,
+                SubscriptionId = subId,
                 Name = "Test",
                 OfferId = "o",
                 PublisherId = "p",

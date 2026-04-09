@@ -24,7 +24,7 @@ public class SubscriptionServiceTests
     {
         return new Subscription
         {
-            Id = Guid.NewGuid(),
+            SubscriptionId = Guid.NewGuid(),
             Name = "Test",
             OfferId = offerId,
             PublisherId = "pub1",
@@ -48,10 +48,10 @@ public class SubscriptionServiceTests
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        var (success, _) = await service.ActivateAsync(sub.Id, "silver", 10);
+        var (success, _) = await service.ActivateAsync(sub.SubscriptionId, "silver", 10);
 
         Assert.True(success);
-        var updated = await db.Subscriptions.FindAsync(sub.Id);
+        var updated = await db.Subscriptions.FirstOrDefaultAsync(s => s.SubscriptionId == sub.SubscriptionId);
         Assert.Equal(SaasSubscriptionStatus.Subscribed, updated!.SaasSubscriptionStatus);
         Assert.Equal(10, updated.Quantity);
     }
@@ -67,7 +67,7 @@ public class SubscriptionServiceTests
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        var (result, _) = await service.ActivateAsync(sub.Id, sub.PlanId, null);
+        var (result, _) = await service.ActivateAsync(sub.SubscriptionId, sub.PlanId, null);
         Assert.False(result);
     }
 
@@ -82,7 +82,7 @@ public class SubscriptionServiceTests
         db.Offers.Add(offer);
         await db.SaveChangesAsync();
 
-        var op = await service.ChangePlanAsync(sub.Id, "silver");
+        var op = await service.ChangePlanAsync(sub.SubscriptionId, "silver");
         Assert.Null(op);
     }
 
@@ -98,7 +98,7 @@ public class SubscriptionServiceTests
         db.Offers.Add(offer);
         await db.SaveChangesAsync();
 
-        var op = await service.ChangePlanAsync(sub.Id, "gold");
+        var op = await service.ChangePlanAsync(sub.SubscriptionId, "gold");
 
         Assert.NotNull(op);
         Assert.Equal(OperationAction.ChangePlan, op.Action);
@@ -114,8 +114,8 @@ public class SubscriptionServiceTests
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        Assert.Null(await service.ChangeQuantityAsync(sub.Id, 0));
-        Assert.Null(await service.ChangeQuantityAsync(sub.Id, -1));
+        Assert.Null(await service.ChangeQuantityAsync(sub.SubscriptionId, 0));
+        Assert.Null(await service.ChangeQuantityAsync(sub.SubscriptionId, -1));
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class SubscriptionServiceTests
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        var op = await service.UnsubscribeAsync(sub.Id);
+        var op = await service.UnsubscribeAsync(sub.SubscriptionId);
         Assert.Null(op);
     }
 
@@ -138,7 +138,7 @@ public class SubscriptionServiceTests
         db.Subscriptions.Add(sub);
         await db.SaveChangesAsync();
 
-        var op = await service.UnsubscribeAsync(sub.Id);
+        var op = await service.UnsubscribeAsync(sub.SubscriptionId);
 
         Assert.NotNull(op);
         Assert.Equal(OperationAction.Unsubscribe, op.Action);
