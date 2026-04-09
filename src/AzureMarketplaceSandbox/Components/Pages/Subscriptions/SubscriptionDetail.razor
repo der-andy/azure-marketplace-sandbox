@@ -22,7 +22,10 @@ else
                 <tr><th>ID</th><td>@_sub.SubscriptionId</td></tr>
                 <tr><th>Offer</th><td>@_sub.OfferId</td></tr>
                 <tr><th>Plan</th><td>@_sub.PlanId</td></tr>
-                <tr><th>Quantity</th><td>@_sub.Quantity</td></tr>
+                @if (_currentPlan?.IsPricePerSeat == true)
+                {
+                    <tr><th>Quantity</th><td>@_sub.Quantity</td></tr>
+                }
                 <tr><th>Publisher</th><td>@_sub.PublisherId</td></tr>
                 <tr><th>Free Trial</th><td>@(_sub.IsFreeTrial ? "Yes" : "No")</td></tr>
                 <tr><th>Auto Renew</th><td>@(_sub.AutoRenew ? "Yes" : "No")</td></tr>
@@ -82,13 +85,16 @@ else
                     <button class="btn btn-outline-primary" @onclick="ChangePlan" disabled="@string.IsNullOrEmpty(_newPlanId)">Change</button>
                 </div>
             </div>
-            <div class="col-md-4">
-                <h6>Change Quantity</h6>
-                <div class="input-group">
-                    <InputNumber class="form-control" @bind-Value="_newQuantity" />
-                    <button class="btn btn-outline-primary" @onclick="ChangeQuantity">Change</button>
+            @if (_currentPlan?.IsPricePerSeat == true)
+            {
+                <div class="col-md-4">
+                    <h6>Change Quantity</h6>
+                    <div class="input-group">
+                        <InputNumber class="form-control" @bind-Value="_newQuantity" />
+                        <button class="btn btn-outline-primary" @onclick="ChangeQuantity">Change</button>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     }
 
@@ -129,6 +135,7 @@ else
 
     private Subscription? _sub;
     private List<Plan> _availablePlans = [];
+    private Plan? _currentPlan;
     private List<Operation> _operations = [];
     private string _newPlanId = string.Empty;
     private int _newQuantity = 1;
@@ -146,6 +153,7 @@ else
         if (_sub is not null)
         {
             _availablePlans = await SubService.ListAvailablePlansAsync(SubscriptionId);
+            _currentPlan = _availablePlans.FirstOrDefault(p => p.PlanId == _sub.PlanId);
             _operations = await Db.Operations
                 .Where(o => o.SubscriptionId == SubscriptionId)
                 .OrderByDescending(o => o.TimeStamp)
