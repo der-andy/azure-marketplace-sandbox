@@ -3,6 +3,7 @@ using System;
 using AzureMarketplaceSandbox.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -11,39 +12,45 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AzureMarketplaceSandbox.Data.Migrations
 {
     [DbContext(typeof(MarketplaceDbContext))]
-    [Migration("20260409123712_InitialCreate")]
+    [Migration("20260409130330_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("AzureMarketplaceSandbox.Domain.Models.AadInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("EmailId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("emailId");
 
                     b.Property<string>("ObjectId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("objectId");
 
                     b.Property<string>("Puid")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("puid");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("tenantId");
 
                     b.HasKey("Id");
@@ -57,24 +64,26 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsResolved")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("SubscriptionId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
@@ -88,28 +97,31 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DimensionId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("id");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("displayName");
 
                     b.Property<int>("OfferId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PricePerUnit")
-                        .HasColumnType("TEXT")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
                         .HasJsonPropertyName("pricePerUnit");
 
                     b.Property<string>("UnitOfMeasure")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("unitOfMeasure");
 
                     b.HasKey("Id");
@@ -123,27 +135,29 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Currency")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("currency");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("displayName");
 
                     b.Property<string>("OfferId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(128)")
                         .HasJsonPropertyName("offerId");
 
                     b.Property<string>("PublisherId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("publisherId");
 
                     b.HasKey("Id");
@@ -158,61 +172,63 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("action");
 
                     b.Property<Guid>("ActivityId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasJsonPropertyName("activityId");
 
                     b.Property<string>("ErrorMessage")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("errorMessage");
 
                     b.Property<string>("ErrorStatusCode")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("errorStatusCode");
 
                     b.Property<string>("OfferId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("offerId");
 
                     b.Property<Guid>("OperationId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasJsonPropertyName("id");
 
                     b.Property<string>("PlanId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("planId");
 
                     b.Property<string>("PublisherId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("publisherId");
 
                     b.Property<int?>("Quantity")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasJsonPropertyName("quantity");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("status");
 
                     b.Property<Guid>("SubscriptionId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasJsonPropertyName("subscriptionId");
 
                     b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasJsonPropertyName("timeStamp");
 
                     b.HasKey("Id");
@@ -224,69 +240,72 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BillingTermUnit")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("description");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("displayName");
 
                     b.Property<bool>("HasFreeTrials")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("hasFreeTrials");
 
                     b.Property<bool>("IsPricePerSeat")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("isPricePerSeat");
 
                     b.Property<bool>("IsPrivate")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("isPrivate");
 
                     b.Property<bool>("IsStopSell")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("isStopSell");
 
                     b.Property<string>("Market")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("market");
 
                     b.Property<int>("MaxQuantity")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasJsonPropertyName("maxQuantity");
 
                     b.Property<int>("MinQuantity")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasJsonPropertyName("minQuantity");
 
                     b.Property<int>("OfferId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("PlanId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("planId");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SubscriptionTermUnit")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TermDescription")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -301,16 +320,19 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("IncludedQuantity")
-                        .HasColumnType("TEXT");
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("MeteringDimensionId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PlanId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -325,75 +347,77 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("AutoRenew")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("autoRenew");
 
                     b.Property<int>("BeneficiaryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasJsonPropertyName("created");
 
                     b.Property<bool>("IsFreeTrial")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("isFreeTrial");
 
                     b.Property<bool>("IsTest")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bit")
                         .HasJsonPropertyName("isTest");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("name");
 
                     b.Property<string>("OfferId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("offerId");
 
                     b.Property<string>("PlanId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("planId");
 
                     b.Property<string>("PublisherId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("publisherId");
 
                     b.Property<int>("PurchaserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int?>("Quantity")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasJsonPropertyName("quantity");
 
                     b.Property<string>("SaasSubscriptionStatus")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("saasSubscriptionStatus");
 
                     b.Property<string>("SandboxType")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("sandboxType");
 
                     b.Property<string>("SessionMode")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("sessionMode");
 
                     b.Property<Guid>("SubscriptionId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasJsonPropertyName("id");
 
                     b.Property<int>("TermId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -410,19 +434,21 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("EndDate")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasJsonPropertyName("endDate");
 
                     b.Property<DateTime?>("StartDate")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasJsonPropertyName("startDate");
 
                     b.Property<string>("TermUnit")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("termUnit");
 
                     b.HasKey("Id");
@@ -436,41 +462,44 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Dimension")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("dimension");
 
                     b.Property<DateTime>("EffectiveStartTime")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasJsonPropertyName("effectiveStartTime");
 
                     b.Property<DateTime>("MessageTime")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime2")
                         .HasJsonPropertyName("messageTime");
 
                     b.Property<string>("PlanId")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("planId");
 
                     b.Property<decimal>("Quantity")
-                        .HasColumnType("TEXT")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
                         .HasJsonPropertyName("quantity");
 
                     b.Property<Guid>("ResourceId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasJsonPropertyName("resourceId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("nvarchar(max)")
                         .HasJsonPropertyName("status");
 
                     b.Property<Guid>("UsageEventId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("uniqueidentifier")
                         .HasJsonPropertyName("usageEventId");
 
                     b.HasKey("Id");
@@ -482,36 +511,38 @@ namespace AzureMarketplaceSandbox.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ErrorMessage")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PayloadJson")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ResponseBody")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ResponseStatusCode")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<Guid>("SubscriptionId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Success")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("WebhookDeliveryLogId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

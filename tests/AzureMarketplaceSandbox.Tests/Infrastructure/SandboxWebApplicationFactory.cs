@@ -12,8 +12,6 @@ public class SandboxWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseSetting("DatabaseProvider", "InMemory");
-
         builder.ConfigureServices(services =>
         {
             // Remove all DbContext-related registrations

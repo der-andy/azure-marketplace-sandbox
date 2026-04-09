@@ -16,19 +16,9 @@ builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOpt
 builder.Services.Configure<SeedDataOptions>(builder.Configuration.GetSection(SeedDataOptions.SectionName));
 
 // Database
-var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider") ?? "Sqlite";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 builder.Services.AddDbContext<MarketplaceDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-    if (dbProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
-    {
-        options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure());
-    }
-    else
-    {
-        options.UseSqlite(connectionString);
-    }
-});
+    options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
 
 // Authentication
 builder.Services.AddAuthentication(SandboxBearerHandler.SchemeName)
@@ -58,11 +48,11 @@ builder.Services.AddRazorComponents()
 var app = builder.Build();
 
 // Apply pending migrations on startup (skip for InMemory provider in tests)
-if (!dbProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
-    db.Database.Migrate();
+    if (db.Database.IsSqlServer())
+        db.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
@@ -104,7 +94,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
     Console.WriteLine($"   Metering API:  {sandboxConfig.BaseUrl}/api/usageEvent");
     Console.WriteLine($"   Webhook URL:   {sandboxConfig.WebhookUrl}");
     Console.WriteLine($"   Landing Page:  {sandboxConfig.LandingPageUrl}");
-    Console.WriteLine($"   DB Provider:   {dbProvider}");
+    Console.WriteLine($"   Database:      {connectionString}");
     Console.WriteLine("  ========================================");
     Console.WriteLine();
 });

@@ -1,19 +1,10 @@
 using AzureMarketplaceSandbox.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AzureMarketplaceSandbox.Data;
 
 public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options) : DbContext(options)
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Migrations are generated with SQLite but may run against SqlServer.
-        // The provider difference causes a false-positive pending-changes warning.
-        optionsBuilder.ConfigureWarnings(w =>
-            w.Ignore(RelationalEventId.PendingModelChangesWarning));
-    }
-
     public DbSet<Offer> Offers => Set<Offer>();
     public DbSet<Plan> Plans => Set<Plan>();
     public DbSet<MeteringDimension> MeteringDimensions => Set<MeteringDimension>();
@@ -57,18 +48,21 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
         modelBuilder.Entity<Plan>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Price).HasPrecision(18, 2);
             entity.Ignore(e => e.PlanComponents);
         });
 
         modelBuilder.Entity<MeteringDimension>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.PricePerUnit).HasPrecision(18, 4);
             entity.Ignore(e => e.Currency);
         });
 
         modelBuilder.Entity<PlanMeteringDimension>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.IncludedQuantity).HasPrecision(18, 4);
             entity.HasOne(e => e.Plan)
                 .WithMany(p => p.PlanMeteringDimensions)
                 .HasForeignKey(e => e.PlanId)
@@ -99,6 +93,7 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
         modelBuilder.Entity<UsageEvent>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.Quantity).HasPrecision(18, 4);
             entity.Property(e => e.Status).HasConversion<string>();
         });
 
