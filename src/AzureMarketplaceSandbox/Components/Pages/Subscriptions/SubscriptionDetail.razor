@@ -34,9 +34,9 @@ else
                     <td>
                         @if (_sub.Term.StartDate.HasValue)
                         {
-                            <a href="#" @onclick="OpenTermModal" @onclick:preventDefault>
+                            <button type="button" class="btn btn-link p-0" @onclick="OpenTermModal">
                                 @_sub.Term.TermUnit (@_sub.Term.StartDate.Value.ToString("yyyy-MMM-dd") - @_sub.Term.EndDate?.ToString("yyyy-MMM-dd"))
-                            </a>
+                            </button>
                         }
                         else
                         {
