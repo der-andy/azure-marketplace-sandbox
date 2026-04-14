@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Rules in `.claude/rules/` are mandatory and must be followed without exception.** They take precedence over any conflicting guidance in this file.
+
 ## Purpose
 
 A local sandbox that mimics the Azure Marketplace **Fulfillment API v2**, **Operations API**, and **Metering API**, so ISV API clients can be tested against it before hitting the real Microsoft APIs. A Blazor-based Admin UI provides Partner Center-like configuration and manual webhook triggering.
@@ -20,6 +22,8 @@ API specifications:
 - **Minimal APIs** with `MapGroup` for REST endpoints
 - **Entity Framework Core** — SQLite locally, Azure SQL in production
 - DB migrations run automatically on startup (`Database.Migrate()`)
+- **xUnit** + `WebApplicationFactory` for integration and unit tests
+- **GitHub Actions** CI/CD — build, test, deploy to Azure Web App
 
 ## Common Commands
 
@@ -35,16 +39,43 @@ dotnet ef migrations add <Name> --project src/AzureMarketplaceSandbox --output-d
 ```
 src/AzureMarketplaceSandbox/
   Program.cs                    — Host setup, DI, middleware, endpoint mapping
-  Domain/Models/                — EF entities matching MS API response shapes (JsonPropertyName)
-  Domain/Enums/                 — SaasSubscriptionStatus, OperationAction, OperationStatus, UsageEventStatus
-  Data/MarketplaceDbContext.cs  — EF Core DbContext
-  Data/Migrations/              — Auto-generated EF migrations
-  Api/                          — Minimal API endpoint groups (Fulfillment, Operations, Metering)
-  Api/Middleware/                — ApiVersion + RequestHeader middleware
-  Auth/                         — SandboxBearerHandler (accepts any Bearer token)
-  Services/                     — Business logic (SubscriptionService, OperationService, MeteringService, WebhookService, TokenService)
-  Configuration/                — Options classes bound from appsettings.json
-  Components/                   — Blazor pages and layout
+  Api/
+    FulfillmentSubscriptionEndpoints.cs — /api/saas/subscriptions CRUD
+    FulfillmentOperationsEndpoints.cs   — /api/saas/subscriptions/{id}/operations
+    MeteringEndpoints.cs                — /api/usageEvent
+    Middleware/                  — ApiVersionMiddleware, RequestHeaderMiddleware
+  Auth/
+    SandboxBearerHandler.cs     — Accepts any Bearer token (sandbox mode)
+  Configuration/
+    SandboxOptions.cs           — SandboxOptions, AuthOptions, SeedDataOptions
+  Data/
+    MarketplaceDbContext.cs     — EF Core DbContext
+    SeedDataService.cs          — IHostedService that seeds demo data on startup
+    Migrations/                 — Auto-generated EF migrations
+  Domain/
+    Enums/                      — SaasSubscriptionStatus, OperationAction, OperationStatus, UsageEventStatus
+    Models/                     — EF entities (Subscription, Offer, Plan, Operation, UsageEvent, SubscriptionTerm, WebhookPayload, etc.)
+  Services/
+    SubscriptionService.cs      — Subscription lifecycle logic
+    OperationService.cs         — Async operation management
+    MeteringService.cs          — Usage event processing
+    WebhookService.cs           — Webhook delivery + logging
+    TokenService.cs             — Marketplace token resolve
+  Components/
+    App.razor, Routes.razor     — Blazor root components
+    Layout/                     — MainLayout, NavMenu, ReconnectModal
+    Pages/
+      Home.razor, Error.razor, NotFound.razor
+      LandingPage/              — LandingPageSimulator.razor
+      Offers/                   — OfferList, OfferEdit
+      Subscriptions/            — SubscriptionList, SubscriptionDetail, CreateSubscription
+      Metering/                 — UsageLog
+      Webhooks/                 — WebhookTester
+
+tests/AzureMarketplaceSandbox.Tests/
+  Api/                          — Integration tests (FulfillmentSubscription, FulfillmentOperations, Metering)
+  Services/                     — Unit tests (SubscriptionService)
+  Infrastructure/               — SandboxWebApplicationFactory, TokenProtectedWebApplicationFactory
 ```
 
 API routes are identical to Microsoft's (`/api/saas/subscriptions/...`, `/api/usageEvent`, etc.) — ISV clients only need to change the base URL.
@@ -53,8 +84,15 @@ API routes are identical to Microsoft's (`/api/saas/subscriptions/...`, `/api/us
 
 - Domain models use `[JsonPropertyName]` to exactly match Microsoft API response shapes
 - Enums stored as strings in the database via `HasConversion<string>()`
-- Auth is a sandbox pass-through: any `Bearer <token>` header is accepted
+- Auth is a sandbox pass-through: any `Bearer <token>` header is accepted (configurable via `AuthOptions.RequiredToken`)
 - Database provider selectable via `DatabaseProvider` config: `"Sqlite"` (default) or `"SqlServer"`
+- Tests use `WebApplicationFactory` with EF Core InMemory provider — no external dependencies needed
+
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/ci-cd.yml`):
+- **build** — restore, build (Release), test — runs on every push/PR to `main`
+- **deploy** — publish + deploy to Azure Web App — runs after build, requires `production` environment
 
 ## Permissions
 
@@ -90,12 +128,3 @@ If a task requires tools, packages, or system changes not already present: stop 
 - Use only dependencies already in the project. If a new dependency is needed: ask first, explain why, and suggest alternatives
 - Don't refactor unrelated code while working on a task — stay focused
 - When fixing bugs: fix the root cause, not the symptom. Add a regression test
-
-## Output Language
-
-- IMPORTANT: ALL written output must be in English — no exceptions:
-  - Code, comments, variable names
-  - Commit messages, PR descriptions
-  - Documentation, feature specs, context entries, PRD
-  - Error messages, log messages, UI text
-- Conversation with the user may be in any language the user prefers
