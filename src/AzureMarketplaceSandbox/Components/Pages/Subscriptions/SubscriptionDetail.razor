@@ -210,7 +210,8 @@ else
 
     private async Task Activate()
     {
-        var (ok, error) = await SubService.ActivateAsync(SubscriptionId, _sub!.PlanId, _sub.Quantity);
+        var quantity = _currentPlan?.IsPricePerSeat == true ? _sub!.Quantity : null;
+        var (ok, error) = await SubService.ActivateAsync(SubscriptionId, _sub!.PlanId, quantity);
         SetMessage(ok ? "Subscription activated." : error ?? "Could not activate.", !ok);
         await LoadData();
     }
