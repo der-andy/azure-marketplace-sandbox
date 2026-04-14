@@ -10,7 +10,9 @@ dotnet run --project src/AzureMarketplaceSandbox
 
 The app starts on `https://localhost:5050` (default). Open the browser to access the Admin UI.
 
-On first run, a default offer ("contoso-saas-offer") with three plans (free, silver, gold) and metering dimensions is seeded automatically.
+On first run, two default offers are seeded automatically:
+- **contoso-saas-offer** — three plans (free, silver, gold) with metering dimensions (API Calls, Storage, Compute Hours)
+- **radiusaas-transactable-prod-preview** — two plans (v4, v5) with metering dimensions for base fees, additional users, and sub-subscriptions
 
 ## Pointing Your Client at the Sandbox
 
@@ -20,7 +22,7 @@ Replace the Microsoft API base URL in your client:
 https://marketplaceapi.microsoft.com  →  https://localhost:5050
 ```
 
-All API routes are identical. The sandbox accepts any `Bearer <token>` in the Authorization header.
+All API routes are identical. The sandbox accepts any `Bearer <token>` in the Authorization header for API calls. The Admin UI requires Entra ID (OIDC) authentication.
 
 ## API Endpoints
 
@@ -70,9 +72,14 @@ Edit `src/AzureMarketplaceSandbox/appsettings.json`:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=marketplace-sandbox.db"
+    "DefaultConnection": "Server=localhost;Database=marketplace-sandbox;Trusted_Connection=True;TrustServerCertificate=True;"
   },
-  "DatabaseProvider": "Sqlite",
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "<your-tenant-id>",
+    "ClientId": "<your-client-id>",
+    "CallbackPath": "/signin-oidc"
+  },
   "Sandbox": {
     "PublisherId": "contoso",
     "WebhookUrl": "https://localhost:7100/api/webhook",
@@ -90,20 +97,23 @@ Edit `src/AzureMarketplaceSandbox/appsettings.json`:
 
 | Setting | Description |
 |---------|-------------|
-| `DatabaseProvider` | `Sqlite` (default) or `SqlServer` for Azure SQL |
+| `ConnectionStrings:DefaultConnection` | SQL Server connection string |
+| `AzureAd:TenantId` | Entra ID tenant for Admin UI login |
+| `AzureAd:ClientId` | Entra ID app registration client ID |
 | `Sandbox:WebhookUrl` | URL where the sandbox sends webhook POST requests |
 | `Sandbox:LandingPageUrl` | Your app's landing page URL for token redirect |
 | `Sandbox:BaseUrl` | The sandbox's own base URL (used in Operation-Location headers) |
-| `Auth:RequiredToken` | If set, only this specific Bearer token is accepted |
-| `SeedData:Enabled` | Seed a default offer with plans on first run |
+| `Auth:RequiredToken` | If set, only this specific Bearer token is accepted for API calls |
+| `SeedData:Enabled` | Seed default offers with plans on first run |
 
 ## Azure Deployment
 
 To deploy as an Azure Web App:
 
-1. Set `DatabaseProvider` to `SqlServer`
-2. Set `ConnectionStrings:DefaultConnection` to your Azure SQL connection string
-3. Configure GitHub Secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_WEBAPP_NAME`
-4. Push to `main` — the `deploy.yml` workflow handles the rest
+1. Set `ConnectionStrings:DefaultConnection` to your Azure SQL connection string
+2. Configure `AzureAd:TenantId` and `AzureAd:ClientId` for Admin UI authentication
+3. Configure GitHub Secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
+4. Configure GitHub Variable: `AZURE_WEBAPP_NAME`
+5. Push to `main` — the `ci-cd.yml` workflow handles the rest
 
 Database migrations are applied automatically on startup.

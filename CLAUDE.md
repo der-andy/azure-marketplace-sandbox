@@ -84,8 +84,8 @@ API routes are identical to Microsoft's (`/api/saas/subscriptions/...`, `/api/us
 
 - Domain models use `[JsonPropertyName]` to exactly match Microsoft API response shapes
 - Enums stored as strings in the database via `HasConversion<string>()`
-- Auth is a sandbox pass-through: any `Bearer <token>` header is accepted (configurable via `AuthOptions.RequiredToken`)
-- Database provider selectable via `DatabaseProvider` config: `"Sqlite"` (default) or `"SqlServer"`
+- Auth is split by path: API routes use SandboxBearerHandler (any `Bearer <token>`, configurable via `AuthOptions.RequiredToken`), Admin UI requires Entra ID (OIDC + Cookies via Microsoft.Identity.Web)
+- Database is SQL Server only (`UseSqlServer`); migrations run automatically on startup
 - Tests use `WebApplicationFactory` with EF Core InMemory provider — no external dependencies needed
 
 ## CI/CD
