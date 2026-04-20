@@ -1,17 +1,14 @@
 using System.Text.Json;
-using AzureMarketplaceSandbox.Configuration;
 using AzureMarketplaceSandbox.Data;
 using AzureMarketplaceSandbox.Domain.Enums;
 using AzureMarketplaceSandbox.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace AzureMarketplaceSandbox.Services;
 
 public class WebhookService(
     IHttpClientFactory httpClientFactory,
     IServiceScopeFactory scopeFactory,
-    IOptions<SandboxOptions> sandboxOptions,
     ILogger<WebhookService> logger)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -23,20 +20,23 @@ public class WebhookService(
     public async Task SendWebhookAsync(int tenantId, Guid subscriptionId, OperationAction action,
         string? newPlanId = null, int? newQuantity = null, Guid? operationId = null)
     {
-        var webhookUrl = sandboxOptions.Value.WebhookUrl;
-        if (string.IsNullOrWhiteSpace(webhookUrl))
-        {
-            logger.LogWarning("Webhook URL is not configured. Skipping webhook for {Action} on subscription {SubscriptionId}.",
-                action, subscriptionId);
-            return;
-        }
-
         // New scope for the fire-and-forget delivery. Seed ITenantContext so the Global Query
         // Filter can locate the caller's subscription and tag the delivery log correctly.
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
         var tenantCtx = scope.ServiceProvider.GetRequiredService<ITenantContext>();
         tenantCtx.Set(tenantId, Guid.Empty);
+
+        var webhookUrl = await db.Tenants.IgnoreQueryFilters()
+            .Where(t => t.Id == tenantId)
+            .Select(t => t.WebhookUrl)
+            .FirstOrDefaultAsync();
+        if (string.IsNullOrWhiteSpace(webhookUrl))
+        {
+            logger.LogWarning("Webhook URL is not configured for tenant {TenantId}. Skipping webhook for {Action} on subscription {SubscriptionId}.",
+                tenantId, action, subscriptionId);
+            return;
+        }
 
         var subscription = await db.Subscriptions
             .Include(s => s.Beneficiary)

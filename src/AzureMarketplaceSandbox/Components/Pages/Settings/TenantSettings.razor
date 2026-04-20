@@ -35,21 +35,38 @@ else
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">Publisher ID</div>
+        <div class="card-header">Configuration</div>
         <div class="card-body">
-            <p class="text-muted small">
-                Used as the default <code>publisherId</code> for newly seeded offers.
-                Changing this does not update existing offers.
-            </p>
-            <div class="input-group">
+            <div class="mb-3">
+                <label class="form-label">Publisher ID</label>
                 <input class="form-control" @bind="_publisherIdInput" />
-                <button class="btn btn-primary" @onclick="SavePublisherId" disabled="@_savingPublisher">
-                    @(_savingPublisher ? "Saving..." : "Save")
-                </button>
+                <div class="form-text">
+                    Default <code>publisherId</code> for newly seeded offers. Changing this does not update existing offers.
+                </div>
             </div>
-            @if (_publisherSaved)
+
+            <div class="mb-3">
+                <label class="form-label">Webhook URL</label>
+                <input class="form-control" @bind="_webhookUrlInput" placeholder="https://your-app.example.com/api/webhook" />
+                <div class="form-text">
+                    Destination for webhook deliveries triggered by subscription lifecycle events.
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Landing Page URL</label>
+                <input class="form-control" @bind="_landingPageUrlInput" placeholder="https://your-app.example.com/landing" />
+                <div class="form-text">
+                    Base URL used when generating simulated marketplace landing links.
+                </div>
+            </div>
+
+            <button class="btn btn-primary" @onclick="SaveConfiguration" disabled="@_saving">
+                @(_saving ? "Saving..." : "Save")
+            </button>
+            @if (_saved)
             {
-                <div class="text-success small mt-2">Saved.</div>
+                <span class="text-success small ms-3">Saved.</span>
             }
         </div>
     </div>
@@ -86,8 +103,10 @@ else
 @code {
     private Tenant? _tenant;
     private string _publisherIdInput = string.Empty;
-    private bool _publisherSaved;
-    private bool _savingPublisher;
+    private string _webhookUrlInput = string.Empty;
+    private string _landingPageUrlInput = string.Empty;
+    private bool _saved;
+    private bool _saving;
     private bool _tokenRevealed;
     private bool _regenerating;
     private bool _regenerated;
@@ -96,17 +115,19 @@ else
     {
         _tenant = await TenantService.GetCurrentAsync();
         _publisherIdInput = _tenant?.PublisherId ?? string.Empty;
+        _webhookUrlInput = _tenant?.WebhookUrl ?? string.Empty;
+        _landingPageUrlInput = _tenant?.LandingPageUrl ?? string.Empty;
     }
 
-    private async Task SavePublisherId()
+    private async Task SaveConfiguration()
     {
         if (_tenant is null || string.IsNullOrWhiteSpace(_publisherIdInput)) return;
-        _savingPublisher = true;
-        _publisherSaved = false;
-        await TenantService.UpdatePublisherIdAsync(_publisherIdInput);
+        _saving = true;
+        _saved = false;
+        await TenantService.UpdateConfigurationAsync(_publisherIdInput, _webhookUrlInput, _landingPageUrlInput);
         _tenant = await TenantService.GetCurrentAsync();
-        _savingPublisher = false;
-        _publisherSaved = true;
+        _saving = false;
+        _saved = true;
     }
 
     private void ToggleReveal()

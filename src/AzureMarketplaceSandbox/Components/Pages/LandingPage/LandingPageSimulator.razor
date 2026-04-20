@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject MarketplaceDbContext Db
 @inject TokenService TokenSvc
+@inject TenantService TenantService
 @inject IOptions<SandboxOptions> SandboxOptions
 
 <PageTitle>Landing Page Simulator</PageTitle>
@@ -130,7 +131,13 @@ else
         }
 
         _generatedToken = await TokenSvc.GenerateTokenAsync(subId);
-        var landingBaseUrl = SandboxOptions.Value.LandingPageUrl.TrimEnd('/');
+        var tenant = await TenantService.GetCurrentAsync();
+        var landingBaseUrl = (tenant?.LandingPageUrl ?? string.Empty).TrimEnd('/');
+        if (string.IsNullOrEmpty(landingBaseUrl))
+        {
+            _error = "Landing Page URL is not configured. Set it on the Settings page.";
+            return;
+        }
         _landingPageUrl = $"{landingBaseUrl}?token={Uri.EscapeDataString(_generatedToken)}";
 
         await LoadTokens();

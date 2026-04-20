@@ -3,12 +3,12 @@
 @inject MarketplaceDbContext Db
 @inject WebhookService WebhookSvc
 @inject ITenantContext TenantCtx
-@inject IOptions<SandboxOptions> SandboxOptions
+@inject TenantService TenantService
 
 <PageTitle>Webhooks</PageTitle>
 
 <h1>Webhook Tester</h1>
-<p class="text-muted">Configured webhook URL: <code>@SandboxOptions.Value.WebhookUrl</code></p>
+<p class="text-muted">Configured webhook URL: <code>@(_webhookUrl ?? "(not set — configure on Settings)")</code></p>
 
 <div class="row mb-4">
     <div class="col-md-6">
@@ -138,9 +138,11 @@ else
     private string? _sendMessage;
     private bool _sendError;
     private int? _expandedLogId;
+    private string? _webhookUrl;
 
     protected override async Task OnInitializedAsync()
     {
+        _webhookUrl = (await TenantService.GetCurrentAsync())?.WebhookUrl;
         _subscriptions = await Db.Subscriptions.OrderByDescending(s => s.Created).ToListAsync();
         await LoadLogs();
     }

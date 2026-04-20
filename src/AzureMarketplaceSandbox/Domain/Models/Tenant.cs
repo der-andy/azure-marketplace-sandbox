@@ -14,6 +14,10 @@ public class Tenant
 
     public string PublisherId { get; set; } = string.Empty;
 
+    public string WebhookUrl { get; set; } = string.Empty;
+
+    public string LandingPageUrl { get; set; } = string.Empty;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime LastLoginAt { get; set; } = DateTime.UtcNow;

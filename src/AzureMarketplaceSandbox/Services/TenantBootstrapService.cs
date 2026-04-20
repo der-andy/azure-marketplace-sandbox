@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using AzureMarketplaceSandbox.Configuration;
 using AzureMarketplaceSandbox.Data;
 using AzureMarketplaceSandbox.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace AzureMarketplaceSandbox.Services;
 
@@ -10,6 +12,7 @@ public class TenantBootstrapService(
     MarketplaceDbContext db,
     ITenantContext tenantContext,
     TenantSeedService seedService,
+    IOptions<SandboxOptions> sandboxOptions,
     ILogger<TenantBootstrapService> logger)
 {
     public async Task<Tenant> BootstrapAsync(Guid entraObjectId, ClaimsPrincipal user)
@@ -21,6 +24,7 @@ public class TenantBootstrapService(
             ?? user.FindFirst("preferred_username")?.Value
             ?? user.FindFirst(ClaimTypes.Email)?.Value;
 
+        var defaults = sandboxOptions.Value;
         var tenant = new Tenant
         {
             EntraObjectId = entraObjectId,
@@ -28,6 +32,8 @@ public class TenantBootstrapService(
             UserPrincipalName = upn,
             ApiBearerToken = GenerateBearerToken(),
             PublisherId = DerivePublisherId(upn),
+            WebhookUrl = defaults.WebhookUrl,
+            LandingPageUrl = defaults.LandingPageUrl,
             CreatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow,
         };

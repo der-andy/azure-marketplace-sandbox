@@ -175,8 +175,8 @@ app.Lifetime.ApplicationStarted.Register(() =>
     Console.WriteLine($"   Admin UI:      {sandboxConfig.BaseUrl}");
     Console.WriteLine($"   API Base:      {sandboxConfig.BaseUrl}/api/saas/subscriptions");
     Console.WriteLine($"   Metering API:  {sandboxConfig.BaseUrl}/api/usageEvent");
-    Console.WriteLine($"   Webhook URL:   {sandboxConfig.WebhookUrl}");
-    Console.WriteLine($"   Landing Page:  {sandboxConfig.LandingPageUrl}");
+    Console.WriteLine($"   Webhook URL:   {sandboxConfig.WebhookUrl}  (default — overridable per tenant)");
+    Console.WriteLine($"   Landing Page:  {sandboxConfig.LandingPageUrl}  (default — overridable per tenant)");
     Console.WriteLine($"   Database:      {connectionString}");
     Console.WriteLine("  ========================================");
     Console.WriteLine();

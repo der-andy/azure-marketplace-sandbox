@@ -20,6 +20,16 @@ public class TenantService(MarketplaceDbContext db, ITenantContext tenantContext
         await db.SaveChangesAsync();
     }
 
+    public async Task UpdateConfigurationAsync(string publisherId, string webhookUrl, string landingPageUrl)
+    {
+        var tenant = await GetCurrentAsync()
+            ?? throw new InvalidOperationException("No current tenant.");
+        tenant.PublisherId = publisherId.Trim();
+        tenant.WebhookUrl = webhookUrl.Trim();
+        tenant.LandingPageUrl = landingPageUrl.Trim();
+        await db.SaveChangesAsync();
+    }
+
     public async Task<string> RegenerateApiBearerTokenAsync()
     {
         var tenant = await GetCurrentAsync()

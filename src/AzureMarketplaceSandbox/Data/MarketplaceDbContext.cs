@@ -32,6 +32,8 @@ public class MarketplaceDbContext(
             entity.Property(e => e.UserPrincipalName).HasMaxLength(256);
             entity.Property(e => e.ApiBearerToken).HasMaxLength(128);
             entity.Property(e => e.PublisherId).HasMaxLength(128);
+            entity.Property(e => e.WebhookUrl).HasMaxLength(2048);
+            entity.Property(e => e.LandingPageUrl).HasMaxLength(2048);
         });
 
         modelBuilder.Entity<AadInfo>(entity =>
