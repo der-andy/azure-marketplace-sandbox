@@ -15,58 +15,9 @@ else
     <p><strong>Publisher:</strong> @_offer.PublisherId | <strong>Display Name:</strong> @_offer.DisplayName | <strong>Currency:</strong> @_offer.Currency</p>
 
     <hr />
-    <h4>Plans</h4>
-
-    <div class="mb-3">
-        <h6>Add Plan</h6>
-        <EditForm Model="_newPlan" OnValidSubmit="AddPlan" FormName="AddPlan">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-2">
-                    <label class="form-label">Plan ID</label>
-                    <InputText class="form-control" @bind-Value="_newPlan.PlanId" />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Display Name</label>
-                    <InputText class="form-control" @bind-Value="_newPlan.DisplayName" />
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">Price</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.Price" />
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">Billing</label>
-                    <InputSelect class="form-control" @bind-Value="_newPlan.BillingTermUnit">
-                        <option value="P1M">P1M</option>
-                        <option value="P1Y">P1Y</option>
-                    </InputSelect>
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">Term</label>
-                    <InputText class="form-control" @bind-Value="_newPlan.SubscriptionTermUnit" />
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">Min Qty</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.MinQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
-                </div>
-                <div class="col-md-1">
-                    <label class="form-label">Max Qty</label>
-                    <InputNumber class="form-control" @bind-Value="_newPlan.MaxQuantity" disabled="@(!_newPlan.IsPricePerSeat)" />
-                </div>
-                <div class="col-md-1">
-                    <div class="form-check mt-4">
-                        <InputCheckbox class="form-check-input" @bind-Value="_newPlan.IsPricePerSeat" />
-                        <label class="form-check-label">Per Seat</label>
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary btn-sm">Add Plan</button>
-                </div>
-            </div>
-        </EditForm>
-        @if (_planError is not null)
-        {
-            <div class="alert alert-danger mt-2">@_planError</div>
-        }
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Plans</h4>
+        <button class="btn btn-primary btn-sm" @onclick="OpenAddPlanModal">Add Plan</button>
     </div>
 
     @if (_offer.Plans.Count == 0)
@@ -102,7 +53,8 @@ else
                         <td>@(plan.IsPricePerSeat ? $"{plan.MinQuantity} - {plan.MaxQuantity}" : "-")</td>
                         <td>@plan.PlanMeteringDimensions.Count</td>
                         <td>
-                            <button class="btn btn-sm btn-danger" @onclick="() => RemovePlan(plan)">Remove</button>
+                            <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditPlanModal(plan)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => RemovePlan(plan)">Remove</button>
                         </td>
                     </tr>
                 }
@@ -111,42 +63,29 @@ else
     }
 
     <hr />
-    <h4>Metering Dimensions</h4>
-    <p class="text-muted">Dimensions are defined at offer level and assigned to plans below.</p>
-
-    <EditForm Model="_newDimension" OnValidSubmit="AddDimension" FormName="AddDimension">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-2">
-                <label class="form-label">Dimension ID</label>
-                <InputText class="form-control" @bind-Value="_newDimension.DimensionId" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Display Name</label>
-                <InputText class="form-control" @bind-Value="_newDimension.DisplayName" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Unit of Measure</label>
-                <InputText class="form-control" @bind-Value="_newDimension.UnitOfMeasure" />
-            </div>
-            <div class="col-md-1">
-                <label class="form-label">Price/Unit</label>
-                <InputNumber class="form-control" @bind-Value="_newDimension.PricePerUnit" />
-            </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-primary btn-sm">Add</button>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h4 class="mb-0">Metering Dimensions</h4>
+            <small class="text-muted">Dimensions are defined at offer level and assigned to plans below.</small>
         </div>
-    </EditForm>
-    @if (_dimError is not null)
-    {
-        <div class="alert alert-danger mt-2">@_dimError</div>
-    }
+        <button class="btn btn-primary btn-sm" @onclick="OpenAddDimensionModal">Add Dimension</button>
+    </div>
 
-    @if (_offer.MeteringDimensions.Count > 0)
+    @if (_offer.MeteringDimensions.Count == 0)
+    {
+        <p class="text-muted">No dimensions yet.</p>
+    }
+    else
     {
         <table class="table table-sm mt-3">
             <thead>
-                <tr><th>Dimension ID</th><th>Display Name</th><th>Unit</th><th>Price/Unit</th><th></th></tr>
+                <tr>
+                    <th>Dimension ID</th>
+                    <th>Display Name</th>
+                    <th>Unit</th>
+                    <th>Price/Unit</th>
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody>
                 @foreach (var dim in _offer.MeteringDimensions)
@@ -156,7 +95,10 @@ else
                         <td>@dim.DisplayName</td>
                         <td>@dim.UnitOfMeasure</td>
                         <td>@dim.PricePerUnit @_offer.Currency</td>
-                        <td><button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveDimension(dim)">Remove</button></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditDimensionModal(dim)">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveDimension(dim)">Remove</button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -212,14 +154,121 @@ else
     <div class="mt-3">
         <a href="offers" class="btn btn-outline-secondary">Back to Offers</a>
     </div>
+
+    @if (_editingPlan is not null)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(_isNewPlan ? "Add Plan" : "Edit Plan")</h5>
+                        <button type="button" class="btn-close" @onclick="ClosePlanModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Plan ID</label>
+                                <InputText class="form-control" @bind-Value="_editingPlan.PlanId" disabled="@(!_isNewPlan)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Display Name</label>
+                                <InputText class="form-control" @bind-Value="_editingPlan.DisplayName" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Price</label>
+                                <InputNumber class="form-control" @bind-Value="_editingPlan.Price" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Billing Term</label>
+                                <InputSelect class="form-control" @bind-Value="_editingPlan.BillingTermUnit">
+                                    <option value="P1M">P1M</option>
+                                    <option value="P1Y">P1Y</option>
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Subscription Term</label>
+                                <InputText class="form-control" @bind-Value="_editingPlan.SubscriptionTermUnit" placeholder="e.g. P3M, P1Y" />
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mt-4">
+                                    <InputCheckbox class="form-check-input" @bind-Value="_editingPlan.IsPricePerSeat" />
+                                    <label class="form-check-label">Per Seat</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Min Qty</label>
+                                <InputNumber class="form-control" @bind-Value="_editingPlan.MinQuantity" disabled="@(!_editingPlan.IsPricePerSeat)" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Max Qty</label>
+                                <InputNumber class="form-control" @bind-Value="_editingPlan.MaxQuantity" disabled="@(!_editingPlan.IsPricePerSeat)" />
+                            </div>
+                        </div>
+                        @if (_planError is not null)
+                        {
+                            <div class="alert alert-danger mt-3 mb-0">@_planError</div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="ClosePlanModal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @onclick="SavePlan">@(_isNewPlan ? "Add Plan" : "Save")</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (_editingDimension is not null)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@(_isNewDimension ? "Add Metering Dimension" : "Edit Metering Dimension")</h5>
+                        <button type="button" class="btn-close" @onclick="CloseDimensionModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Dimension ID</label>
+                                <InputText class="form-control" @bind-Value="_editingDimension.DimensionId" disabled="@(!_isNewDimension)" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Display Name</label>
+                                <InputText class="form-control" @bind-Value="_editingDimension.DisplayName" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Unit of Measure</label>
+                                <InputText class="form-control" @bind-Value="_editingDimension.UnitOfMeasure" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Price/Unit</label>
+                                <InputNumber class="form-control" @bind-Value="_editingDimension.PricePerUnit" />
+                            </div>
+                        </div>
+                        @if (_dimError is not null)
+                        {
+                            <div class="alert alert-danger mt-3 mb-0">@_dimError</div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseDimensionModal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @onclick="SaveDimension">@(_isNewDimension ? "Add" : "Save")</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @code {
     [Parameter] public string OfferId { get; set; } = string.Empty;
 
     private Offer? _offer;
-    private Plan _newPlan = new();
-    private MeteringDimension _newDimension = new();
+    private Plan? _editingPlan;
+    private bool _isNewPlan;
+    private MeteringDimension? _editingDimension;
+    private bool _isNewDimension;
     private string? _planError, _dimError;
 
     protected override async Task OnInitializedAsync()
@@ -238,36 +287,100 @@ else
 
     private static readonly System.Text.RegularExpressions.Regex TermUnitPattern = new(@"^P(\d+)([MY])$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-    private async Task AddPlan()
+    private void OpenAddPlanModal()
     {
+        _editingPlan = new Plan
+        {
+            BillingTermUnit = "P1M",
+            SubscriptionTermUnit = "P1M"
+        };
+        _isNewPlan = true;
         _planError = null;
-        if (string.IsNullOrWhiteSpace(_newPlan.PlanId))
+    }
+
+    private void OpenEditPlanModal(Plan plan)
+    {
+        _editingPlan = new Plan
+        {
+            Id = plan.Id,
+            PlanId = plan.PlanId,
+            DisplayName = plan.DisplayName,
+            Description = plan.Description,
+            Price = plan.Price,
+            BillingTermUnit = plan.BillingTermUnit,
+            SubscriptionTermUnit = plan.SubscriptionTermUnit,
+            MinQuantity = plan.MinQuantity,
+            MaxQuantity = plan.MaxQuantity,
+            IsPricePerSeat = plan.IsPricePerSeat,
+            IsPrivate = plan.IsPrivate,
+            HasFreeTrials = plan.HasFreeTrials,
+            IsStopSell = plan.IsStopSell,
+            Market = plan.Market,
+            TermDescription = plan.TermDescription
+        };
+        _isNewPlan = false;
+        _planError = null;
+    }
+
+    private void ClosePlanModal()
+    {
+        _editingPlan = null;
+        _planError = null;
+    }
+
+    private async Task SavePlan()
+    {
+        if (_editingPlan is null) return;
+
+        _planError = null;
+        if (string.IsNullOrWhiteSpace(_editingPlan.PlanId))
         {
             _planError = "Plan ID is required.";
             return;
         }
-        if (_newPlan.BillingTermUnit is not "P1M" and not "P1Y")
+        if (_editingPlan.BillingTermUnit is not "P1M" and not "P1Y")
         {
             _planError = "Billing Term must be P1M or P1Y.";
             return;
         }
-        var termMatch = TermUnitPattern.Match(_newPlan.SubscriptionTermUnit);
+        var termMatch = TermUnitPattern.Match(_editingPlan.SubscriptionTermUnit);
         if (!termMatch.Success)
         {
             _planError = "Subscription Term must match format P{amount}{M|Y}, e.g. P3M, P1Y.";
             return;
         }
-        var billingUnit = _newPlan.BillingTermUnit.EndsWith("Y", StringComparison.OrdinalIgnoreCase) ? "Y" : "M";
+        var billingUnit = _editingPlan.BillingTermUnit.EndsWith("Y", StringComparison.OrdinalIgnoreCase) ? "Y" : "M";
         var termUnit = termMatch.Groups[2].Value.ToUpperInvariant();
         if (billingUnit != termUnit)
         {
             _planError = "Subscription Term must use the same base unit (M/Y) as Billing Term.";
             return;
         }
-        _newPlan.Offer = _offer!;
-        Db.Plans.Add(_newPlan);
+
+        if (_isNewPlan)
+        {
+            _editingPlan.Offer = _offer!;
+            Db.Plans.Add(_editingPlan);
+        }
+        else
+        {
+            var existing = await Db.Plans.FirstOrDefaultAsync(p => p.Id == _editingPlan.Id);
+            if (existing is null)
+            {
+                _planError = "Plan no longer exists.";
+                return;
+            }
+            existing.DisplayName = _editingPlan.DisplayName;
+            existing.Price = _editingPlan.Price;
+            existing.BillingTermUnit = _editingPlan.BillingTermUnit;
+            existing.SubscriptionTermUnit = _editingPlan.SubscriptionTermUnit;
+            existing.MinQuantity = _editingPlan.MinQuantity;
+            existing.MaxQuantity = _editingPlan.MaxQuantity;
+            existing.IsPricePerSeat = _editingPlan.IsPricePerSeat;
+        }
+
         await Db.SaveChangesAsync();
-        _newPlan = new();
+        _editingPlan = null;
         await LoadOffer();
     }
 
@@ -278,18 +391,64 @@ else
         await LoadOffer();
     }
 
-    private async Task AddDimension()
+    private void OpenAddDimensionModal()
     {
+        _editingDimension = new MeteringDimension();
+        _isNewDimension = true;
         _dimError = null;
-        if (string.IsNullOrWhiteSpace(_newDimension.DimensionId))
+    }
+
+    private void OpenEditDimensionModal(MeteringDimension dim)
+    {
+        _editingDimension = new MeteringDimension
+        {
+            Id = dim.Id,
+            DimensionId = dim.DimensionId,
+            DisplayName = dim.DisplayName,
+            UnitOfMeasure = dim.UnitOfMeasure,
+            PricePerUnit = dim.PricePerUnit
+        };
+        _isNewDimension = false;
+        _dimError = null;
+    }
+
+    private void CloseDimensionModal()
+    {
+        _editingDimension = null;
+        _dimError = null;
+    }
+
+    private async Task SaveDimension()
+    {
+        if (_editingDimension is null) return;
+
+        _dimError = null;
+        if (string.IsNullOrWhiteSpace(_editingDimension.DimensionId))
         {
             _dimError = "Dimension ID is required.";
             return;
         }
-        _newDimension.Offer = _offer!;
-        Db.MeteringDimensions.Add(_newDimension);
+
+        if (_isNewDimension)
+        {
+            _editingDimension.Offer = _offer!;
+            Db.MeteringDimensions.Add(_editingDimension);
+        }
+        else
+        {
+            var existing = await Db.MeteringDimensions.FirstOrDefaultAsync(d => d.Id == _editingDimension.Id);
+            if (existing is null)
+            {
+                _dimError = "Dimension no longer exists.";
+                return;
+            }
+            existing.DisplayName = _editingDimension.DisplayName;
+            existing.UnitOfMeasure = _editingDimension.UnitOfMeasure;
+            existing.PricePerUnit = _editingDimension.PricePerUnit;
+        }
+
         await Db.SaveChangesAsync();
-        _newDimension = new();
+        _editingDimension = null;
         await LoadOffer();
     }
 
