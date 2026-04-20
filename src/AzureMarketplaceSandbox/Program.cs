@@ -59,6 +59,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 // Services
+builder.Services.AddScoped<ITenantContext, TenantContext>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<OperationService>();

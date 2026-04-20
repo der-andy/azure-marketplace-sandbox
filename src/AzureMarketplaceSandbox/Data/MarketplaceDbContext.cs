@@ -5,6 +5,7 @@ namespace AzureMarketplaceSandbox.Data;
 
 public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options) : DbContext(options)
 {
+    public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<Offer> Offers => Set<Offer>();
     public DbSet<Plan> Plans => Set<Plan>();
     public DbSet<MeteringDimension> MeteringDimensions => Set<MeteringDimension>();
@@ -17,6 +18,17 @@ public class MarketplaceDbContext(DbContextOptions<MarketplaceDbContext> options
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Tenant>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.EntraObjectId).IsUnique();
+            entity.HasIndex(e => e.ApiBearerToken).IsUnique();
+            entity.Property(e => e.DisplayName).HasMaxLength(256);
+            entity.Property(e => e.UserPrincipalName).HasMaxLength(256);
+            entity.Property(e => e.ApiBearerToken).HasMaxLength(128);
+            entity.Property(e => e.PublisherId).HasMaxLength(128);
+        });
+
         modelBuilder.Entity<AadInfo>(entity =>
         {
             entity.HasKey(e => e.Id);
