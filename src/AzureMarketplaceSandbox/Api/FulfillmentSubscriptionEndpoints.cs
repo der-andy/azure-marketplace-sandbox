@@ -126,6 +126,7 @@ public static class FulfillmentSubscriptionEndpoints
             HttpContext context,
             SubscriptionService subscriptionService,
             WebhookService webhookService,
+            ITenantContext tenantContext,
             IOptions<SandboxOptions> sandboxOptions) =>
         {
             var body = await context.Request.ReadFromJsonAsync<PatchSubscriptionRequest>();
@@ -164,7 +165,7 @@ public static class FulfillmentSubscriptionEndpoints
             var action = body.PlanId is not null
                 ? Domain.Enums.OperationAction.ChangePlan
                 : Domain.Enums.OperationAction.ChangeQuantity;
-            _ = webhookService.SendWebhookAsync(subscriptionId, action,
+            _ = webhookService.SendWebhookAsync(tenantContext.TenantId!.Value, subscriptionId, action,
                 newPlanId: body.PlanId, newQuantity: body.Quantity, operationId: operation.OperationId);
 
             return Results.Accepted(operationLocation);
@@ -176,6 +177,7 @@ public static class FulfillmentSubscriptionEndpoints
             HttpContext context,
             SubscriptionService subscriptionService,
             WebhookService webhookService,
+            ITenantContext tenantContext,
             MarketplaceDbContext db,
             IOptions<SandboxOptions> sandboxOptions) =>
         {
@@ -200,7 +202,7 @@ public static class FulfillmentSubscriptionEndpoints
             var operationLocation = $"{baseUrl}/api/saas/subscriptions/{subscriptionId}/operations/{operation.OperationId}?api-version=2018-08-31";
             context.Response.Headers["Operation-Location"] = operationLocation;
 
-            _ = webhookService.SendWebhookAsync(subscriptionId, Domain.Enums.OperationAction.Unsubscribe,
+            _ = webhookService.SendWebhookAsync(tenantContext.TenantId!.Value, subscriptionId, Domain.Enums.OperationAction.Unsubscribe,
                 operationId: operation.OperationId);
 
             return Results.Accepted(operationLocation);

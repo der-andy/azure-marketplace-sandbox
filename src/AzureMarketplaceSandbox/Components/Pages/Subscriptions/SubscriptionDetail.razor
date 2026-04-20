@@ -4,6 +4,7 @@
 @inject SubscriptionService SubService
 @inject OperationService OpService
 @inject WebhookService WebhookSvc
+@inject ITenantContext TenantCtx
 @inject NavigationManager Nav
 
 <PageTitle>Subscription Detail</PageTitle>
@@ -247,7 +248,7 @@ else
         Db.Operations.Add(op);
         _sub!.SaasSubscriptionStatus = SaasSubscriptionStatus.Suspended;
         await Db.SaveChangesAsync();
-        _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Suspend, operationId: op.OperationId);
+        _ = WebhookSvc.SendWebhookAsync(TenantCtx.TenantId!.Value, SubscriptionId, OperationAction.Suspend, operationId: op.OperationId);
         SetMessage("Subscription suspended.", false);
         await LoadData();
     }
@@ -258,7 +259,7 @@ else
         Db.Operations.Add(op);
         _sub!.SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed;
         await Db.SaveChangesAsync();
-        _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Reinstate, operationId: op.OperationId);
+        _ = WebhookSvc.SendWebhookAsync(TenantCtx.TenantId!.Value, SubscriptionId, OperationAction.Reinstate, operationId: op.OperationId);
         SetMessage("Subscription reinstated.", false);
         await LoadData();
     }
@@ -268,7 +269,7 @@ else
         var op = await SubService.UnsubscribeAsync(SubscriptionId);
         if (op is not null)
         {
-            _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.Unsubscribe, operationId: op.OperationId);
+            _ = WebhookSvc.SendWebhookAsync(TenantCtx.TenantId!.Value, SubscriptionId, OperationAction.Unsubscribe, operationId: op.OperationId);
             // Immediately apply for admin action
             op.Status = OperationStatus.Succeeded;
             _sub!.SaasSubscriptionStatus = SaasSubscriptionStatus.Unsubscribed;
@@ -287,7 +288,7 @@ else
         var op = await SubService.ChangePlanAsync(SubscriptionId, _newPlanId);
         if (op is not null)
         {
-            _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.ChangePlan,
+            _ = WebhookSvc.SendWebhookAsync(TenantCtx.TenantId!.Value, SubscriptionId, OperationAction.ChangePlan,
                 newPlanId: _newPlanId, operationId: op.OperationId);
             SetMessage($"ChangePlan operation created (InProgress). Webhook sent.", false);
         }
@@ -304,7 +305,7 @@ else
         var op = await SubService.ChangeQuantityAsync(SubscriptionId, _newQuantity);
         if (op is not null)
         {
-            _ = WebhookSvc.SendWebhookAsync(SubscriptionId, OperationAction.ChangeQuantity,
+            _ = WebhookSvc.SendWebhookAsync(TenantCtx.TenantId!.Value, SubscriptionId, OperationAction.ChangeQuantity,
                 newQuantity: _newQuantity, operationId: op.OperationId);
             SetMessage($"ChangeQuantity operation created (InProgress). Webhook sent.", false);
         }

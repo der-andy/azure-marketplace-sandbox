@@ -43,24 +43,28 @@ src/AzureMarketplaceSandbox/
     FulfillmentSubscriptionEndpoints.cs — /api/saas/subscriptions CRUD
     FulfillmentOperationsEndpoints.cs   — /api/saas/subscriptions/{id}/operations
     MeteringEndpoints.cs                — /api/usageEvent
-    Middleware/                  — ApiVersionMiddleware, RequestHeaderMiddleware
+    Middleware/                  — ApiVersionMiddleware, RequestHeaderMiddleware, TenantResolutionMiddleware
   Auth/
-    SandboxBearerHandler.cs     — Accepts any Bearer token (sandbox mode)
+    SandboxBearerHandler.cs     — Resolves per-tenant ApiBearerToken → populates ITenantContext
   Configuration/
-    SandboxOptions.cs           — SandboxOptions, AuthOptions, SeedDataOptions
+    SandboxOptions.cs           — SandboxOptions (WebhookUrl, LandingPageUrl, BaseUrl)
   Data/
     MarketplaceDbContext.cs     — EF Core DbContext
-    SeedDataService.cs          — IHostedService that seeds demo data on startup
+    TenantIdAssigningInterceptor.cs — SaveChangesInterceptor that stamps new entities with current TenantId
     Migrations/                 — Auto-generated EF migrations
   Domain/
     Enums/                      — SaasSubscriptionStatus, OperationAction, OperationStatus, UsageEventStatus
     Models/                     — EF entities (Subscription, Offer, Plan, Operation, UsageEvent, SubscriptionTerm, WebhookPayload, etc.)
   Services/
+    ITenantContext.cs           — Request-scoped tenant identity used by Global Query Filter
     SubscriptionService.cs      — Subscription lifecycle logic
     OperationService.cs         — Async operation management
     MeteringService.cs          — Usage event processing
-    WebhookService.cs           — Webhook delivery + logging
+    WebhookService.cs           — Webhook delivery + logging (takes tenantId to seed the new scope)
     TokenService.cs             — Marketplace token resolve
+    TenantService.cs            — Get/update current tenant, regenerate API bearer token
+    TenantBootstrapService.cs   — Creates new Tenant on first Entra login, derives publisherId from UPN
+    TenantSeedService.cs        — Seeds demo offers/plans for a tenant
   Components/
     App.razor, Routes.razor     — Blazor root components
     Layout/                     — MainLayout, NavMenu, ReconnectModal
@@ -71,11 +75,12 @@ src/AzureMarketplaceSandbox/
       Subscriptions/            — SubscriptionList, SubscriptionDetail, CreateSubscription
       Metering/                 — UsageLog
       Webhooks/                 — WebhookTester
+      Settings/                 — TenantSettings
 
 tests/AzureMarketplaceSandbox.Tests/
   Api/                          — Integration tests (FulfillmentSubscription, FulfillmentOperations, Metering)
   Services/                     — Unit tests (SubscriptionService)
-  Infrastructure/               — SandboxWebApplicationFactory, TokenProtectedWebApplicationFactory
+  Infrastructure/               — SandboxWebApplicationFactory (sets up a default tenant + ITenantContext override)
 ```
 
 API routes are identical to Microsoft's (`/api/saas/subscriptions/...`, `/api/usageEvent`, etc.) — ISV clients only need to change the base URL.
@@ -84,7 +89,8 @@ API routes are identical to Microsoft's (`/api/saas/subscriptions/...`, `/api/us
 
 - Domain models use `[JsonPropertyName]` to exactly match Microsoft API response shapes
 - Enums stored as strings in the database via `HasConversion<string>()`
-- Auth is split by path: API routes use SandboxBearerHandler (any `Bearer <token>`, configurable via `AuthOptions.RequiredToken`), Admin UI requires Entra ID (OIDC + Cookies via Microsoft.Identity.Web)
+- **Multi-tenant**: every tenant-bound entity has a `TenantId` FK and a Global Query Filter on `ITenantContext.TenantId`, so cross-tenant reads return empty/404. Each Entra user gets their own tenant on first login (`TenantBootstrapService` + `TenantSeedService`)
+- Auth is split by path: API routes use SandboxBearerHandler (looks up the per-tenant `ApiBearerToken` in the DB), Admin UI requires Entra ID (OIDC + Cookies via Microsoft.Identity.Web). `TenantResolutionMiddleware` populates `ITenantContext` for cookie-auth'd requests
 - Database is SQL Server only (`UseSqlServer`); migrations run automatically on startup
 - Tests use `WebApplicationFactory` with EF Core InMemory provider — no external dependencies needed
 

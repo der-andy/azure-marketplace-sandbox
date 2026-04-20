@@ -20,7 +20,7 @@ public class WebhookService(
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     };
 
-    public async Task SendWebhookAsync(Guid subscriptionId, OperationAction action,
+    public async Task SendWebhookAsync(int tenantId, Guid subscriptionId, OperationAction action,
         string? newPlanId = null, int? newQuantity = null, Guid? operationId = null)
     {
         var webhookUrl = sandboxOptions.Value.WebhookUrl;
@@ -31,9 +31,12 @@ public class WebhookService(
             return;
         }
 
-        // Use a new scope to avoid DbContext concurrency issues
+        // New scope for the fire-and-forget delivery. Seed ITenantContext so the Global Query
+        // Filter can locate the caller's subscription and tag the delivery log correctly.
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MarketplaceDbContext>();
+        var tenantCtx = scope.ServiceProvider.GetRequiredService<ITenantContext>();
+        tenantCtx.Set(tenantId, Guid.Empty);
 
         var subscription = await db.Subscriptions
             .Include(s => s.Beneficiary)

@@ -81,16 +81,9 @@ Edit `src/AzureMarketplaceSandbox/appsettings.json`:
     "CallbackPath": "/signin-oidc"
   },
   "Sandbox": {
-    "PublisherId": "contoso",
     "WebhookUrl": "https://localhost:7100/api/webhook",
     "LandingPageUrl": "https://localhost:7100/landing",
     "BaseUrl": "https://localhost:5050"
-  },
-  "Auth": {
-    "RequiredToken": null
-  },
-  "SeedData": {
-    "Enabled": true
   }
 }
 ```
@@ -103,8 +96,10 @@ Edit `src/AzureMarketplaceSandbox/appsettings.json`:
 | `Sandbox:WebhookUrl` | URL where the sandbox sends webhook POST requests |
 | `Sandbox:LandingPageUrl` | Your app's landing page URL for token redirect |
 | `Sandbox:BaseUrl` | The sandbox's own base URL (used in Operation-Location headers) |
-| `Auth:RequiredToken` | If set, only this specific Bearer token is accepted for API calls |
-| `SeedData:Enabled` | Seed default offers with plans on first run |
+
+The API bearer token and publisher ID are **per-tenant** and managed from the
+`/settings` page. Each Entra user gets their own tenant — isolated data, own
+bearer token, own publisher ID — on first login.
 
 ## Azure Deployment
 

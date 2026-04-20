@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject MarketplaceDbContext Db
 @inject WebhookService WebhookSvc
+@inject ITenantContext TenantCtx
 @inject IOptions<SandboxOptions> SandboxOptions
 
 <PageTitle>Webhooks</PageTitle>
@@ -164,7 +165,7 @@ else
 
         try
         {
-            await WebhookSvc.SendWebhookAsync(subId, _selectedAction,
+            await WebhookSvc.SendWebhookAsync(TenantCtx.TenantId!.Value, subId, _selectedAction,
                 newPlanId: _selectedAction == OperationAction.ChangePlan ? _newPlanId : null,
                 newQuantity: _selectedAction == OperationAction.ChangeQuantity ? _newQuantity : null);
             _sendMessage = $"Webhook '{_selectedAction}' sent.";
