@@ -1,0 +1,127 @@
+@page "/settings"
+@rendermode InteractiveServer
+@inject TenantService TenantService
+
+<PageTitle>Settings</PageTitle>
+
+<h1>Tenant Settings</h1>
+
+@if (_tenant is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header">Identity</div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Display name</dt>
+                <dd class="col-sm-9">@_tenant.DisplayName</dd>
+
+                <dt class="col-sm-3">User principal name</dt>
+                <dd class="col-sm-9">@(_tenant.UserPrincipalName ?? "—")</dd>
+
+                <dt class="col-sm-3">Entra Object ID</dt>
+                <dd class="col-sm-9"><code>@_tenant.EntraObjectId</code></dd>
+
+                <dt class="col-sm-3">Created</dt>
+                <dd class="col-sm-9">@_tenant.CreatedAt.ToString("yyyy-MMM-dd HH:mm:ss") UTC</dd>
+
+                <dt class="col-sm-3">Last login</dt>
+                <dd class="col-sm-9">@_tenant.LastLoginAt.ToString("yyyy-MMM-dd HH:mm:ss") UTC</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Publisher ID</div>
+        <div class="card-body">
+            <p class="text-muted small">
+                Used as the default <code>publisherId</code> for newly seeded offers.
+                Changing this does not update existing offers.
+            </p>
+            <div class="input-group">
+                <input class="form-control" @bind="_publisherIdInput" />
+                <button class="btn btn-primary" @onclick="SavePublisherId" disabled="@_savingPublisher">
+                    @(_savingPublisher ? "Saving..." : "Save")
+                </button>
+            </div>
+            @if (_publisherSaved)
+            {
+                <div class="text-success small mt-2">Saved.</div>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">API Bearer Token</div>
+        <div class="card-body">
+            <p class="text-muted small">
+                Required for calls to <code>/api/saas/*</code> and <code>/api/usageEvent</code>.
+                Regenerating the token immediately invalidates the previous one.
+            </p>
+            <div class="input-group mb-2">
+                <input class="form-control font-monospace"
+                       type="@(_tokenRevealed ? "text" : "password")"
+                       value="@_tenant.ApiBearerToken"
+                       readonly />
+                <button class="btn btn-outline-secondary" @onclick="ToggleReveal">
+                    @(_tokenRevealed ? "Hide" : "Reveal")
+                </button>
+                <button class="btn btn-outline-danger" @onclick="RegenerateToken" disabled="@_regenerating">
+                    @(_regenerating ? "Regenerating..." : "Regenerate")
+                </button>
+            </div>
+            @if (_regenerated)
+            {
+                <div class="alert alert-warning mb-0">
+                    New token issued. Update all integrations — the previous token is no longer accepted.
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private Tenant? _tenant;
+    private string _publisherIdInput = string.Empty;
+    private bool _publisherSaved;
+    private bool _savingPublisher;
+    private bool _tokenRevealed;
+    private bool _regenerating;
+    private bool _regenerated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _tenant = await TenantService.GetCurrentAsync();
+        _publisherIdInput = _tenant?.PublisherId ?? string.Empty;
+    }
+
+    private async Task SavePublisherId()
+    {
+        if (_tenant is null || string.IsNullOrWhiteSpace(_publisherIdInput)) return;
+        _savingPublisher = true;
+        _publisherSaved = false;
+        await TenantService.UpdatePublisherIdAsync(_publisherIdInput);
+        _tenant = await TenantService.GetCurrentAsync();
+        _savingPublisher = false;
+        _publisherSaved = true;
+    }
+
+    private void ToggleReveal()
+    {
+        _tokenRevealed = !_tokenRevealed;
+    }
+
+    private async Task RegenerateToken()
+    {
+        _regenerating = true;
+        _regenerated = false;
+        await TenantService.RegenerateApiBearerTokenAsync();
+        _tenant = await TenantService.GetCurrentAsync();
+        _tokenRevealed = true;
+        _regenerating = false;
+        _regenerated = true;
+    }
+}

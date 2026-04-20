@@ -65,6 +65,7 @@ builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<OperationService>();
 builder.Services.AddScoped<MeteringService>();
 builder.Services.AddScoped<WebhookService>();
+builder.Services.AddScoped<TenantService>();
 builder.Services.AddScoped<TenantSeedService>();
 builder.Services.AddScoped<TenantBootstrapService>();
 builder.Services.AddHttpClient("Webhook");
