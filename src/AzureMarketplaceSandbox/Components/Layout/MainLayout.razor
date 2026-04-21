@@ -9,6 +9,10 @@
         <div class="top-row px-4 d-flex justify-content-end">
             <AuthorizeView>
                 <Authorized>
+                    <button type="button" class="btn btn-sm btn-outline-secondary theme-toggle me-3" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle light/dark theme">
+                        <span class="bi bi-moon-fill icon-moon" aria-hidden="true"></span>
+                        <span class="bi bi-sun-fill icon-sun" aria-hidden="true"></span>
+                    </button>
                     <span class="me-2" title="@context.User.Identity?.Name">@context.User.FindFirst("name")?.Value</span>
                     <a href="authentication/logout" class="btn btn-outline-secondary btn-sm">Logout</a>
                 </Authorized>
