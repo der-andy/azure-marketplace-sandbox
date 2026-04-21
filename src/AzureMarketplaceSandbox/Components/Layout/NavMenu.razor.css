@@ -64,6 +64,20 @@
 }
 
 .navbar-toggler:checked ~ .nav-scrollable {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-footer {
+    margin-top: auto;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-footer-logo {
+    height: 2rem;
+    width: auto;
     display: block;
 }
 
@@ -74,7 +88,8 @@
 
     .nav-scrollable {
         /* Never collapse the sidebar for wide screens */
-        display: block;
+        display: flex;
+        flex-direction: column;
 
         /* Allow sidebar to scroll for tall menus */
         height: calc(100vh - 3.5rem);
